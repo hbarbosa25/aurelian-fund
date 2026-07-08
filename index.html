@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Aurelian Ventures — Capital · Intelligence · Legacy</title>
+<meta name="description" content="Aurelian Ventures is a New York studio investing at the founding round of teams rebuilding the foundational layers of compute, settlement, and intelligence." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#15251a;
+    --ink-2:#1a2d20;
+    --ink-3:#1e3325;
+    --gold:#c7a961;
+    --gold-soft:#d8c088;
+    --gold-dim:#9c854e;
+    --cream:#e2e6d8;
+    --sage:#8d9884;
+    --sage-dim:#66705d;
+    --live:#5fae74;
+    --line:rgba(199,169,97,0.22);
+    --line-soft:rgba(199,169,97,0.12);
+    --maxw:1180px;
+    --serif:'Playfair Display', Georgia, serif;
+    --sans:'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--cream);
+    font-family:var(--sans);
+    font-weight:300;
+    line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+    letter-spacing:.005em;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:radial-gradient(120% 80% at 50% -10%, rgba(199,169,97,0.06), transparent 60%);
+  }
+
+  a{color:inherit;text-decoration:none;}
+  ::selection{background:rgba(199,169,97,.28);color:#fff;}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 40px;position:relative;z-index:1;}
+
+  .eyebrow{
+    font-family:var(--sans);
+    font-size:11px;font-weight:500;
+    letter-spacing:.32em;text-transform:uppercase;
+    color:var(--gold);
+    display:flex;align-items:center;gap:16px;
+  }
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--gold);opacity:.6;}
+  .eyebrow.center{justify-content:center;}
+  .eyebrow.center::before{display:none;}
+
+  h1,h2,h3{font-family:var(--serif);font-weight:500;line-height:1.08;margin:0;}
+  .display{font-size:clamp(2.6rem,6.4vw,4.9rem);letter-spacing:-.01em;}
+  .h2{font-size:clamp(1.9rem,4vw,3.1rem);}
+  .h3{font-size:clamp(1.3rem,2.4vw,1.75rem);}
+  .lead{
+    font-family:var(--serif);font-size:clamp(1.15rem,2vw,1.5rem);
+    line-height:1.5;color:var(--cream);font-weight:400;
+  }
+  .lead em{color:var(--gold-soft);}
+  p{margin:0 0 1.1em;}
+  .muted{color:var(--sage);}
+  .body-col{max-width:60ch;}
+
+  header.nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(21,37,26,.82);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line-soft);
+  }
+  .nav-inner{
+    max-width:var(--maxw);margin:0 auto;padding:16px 40px;
+    display:flex;align-items:center;justify-content:space-between;gap:24px;
+  }
+  .brand{display:flex;align-items:center;gap:14px;cursor:pointer;background:none;border:0;padding:0;}
+  .mark{width:34px;height:34px;flex:none;}
+  .brand .wordmark{display:flex;flex-direction:column;line-height:1;}
+  .brand .name{
+    font-family:var(--serif);font-size:16px;letter-spacing:.16em;color:var(--cream);
+    text-transform:uppercase;font-weight:500;white-space:nowrap;
+  }
+  .brand .tag{
+    font-size:8.5px;letter-spacing:.30em;color:var(--gold-dim);
+    text-transform:uppercase;margin-top:5px;font-weight:500;
+  }
+  nav.links{display:flex;align-items:center;gap:6px;}
+  .navlink{
+    background:none;border:0;cursor:pointer;
+    font-family:var(--sans);font-size:12px;font-weight:500;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--sage);
+    padding:9px 14px;border-radius:2px;transition:color .25s;
+  }
+  .navlink:hover{color:var(--cream);}
+  .navlink[aria-current="true"]{color:var(--gold);}
+  .btn-access{
+    font-family:var(--sans);font-size:11.5px;font-weight:500;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--gold);
+    border:1px solid var(--line);background:none;cursor:pointer;
+    padding:11px 20px;border-radius:2px;transition:.28s;margin-left:10px;
+    display:inline-block;text-align:center;
+  }
+  .btn-access:hover{background:var(--gold);color:var(--ink);border-color:var(--gold);}
+  .menu-toggle{display:none;background:none;border:0;color:var(--gold);cursor:pointer;padding:8px;}
+
+  .page{display:none;}
+  .page.active{display:block;animation:pageIn .5s ease both;}
+  @keyframes pageIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+  .stratum{
+    padding:110px 0;
+    border-bottom:1px solid var(--line-soft);
+    position:relative;
+  }
+  .stratum:last-child{border-bottom:0;}
+  .stratum-head{display:flex;align-items:baseline;gap:20px;margin-bottom:34px;}
+
+  .hero{
+    padding:130px 0 118px;
+    border-bottom:1px solid var(--line-soft);
+  }
+  .hero .display{margin:30px 0 34px;max-width:17ch;}
+  .hero .lead{max-width:46ch;}
+  .hero .loss{
+    font-family:var(--serif);font-style:italic;color:var(--gold-soft);
+    font-size:clamp(1.05rem,1.7vw,1.28rem);margin-top:30px;
+    padding-left:22px;border-left:1px solid var(--gold-dim);max-width:48ch;
+  }
+  .hero-cta{margin-top:48px;display:flex;align-items:center;gap:28px;flex-wrap:wrap;}
+
+  .cta-lg{
+    font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--ink);background:var(--gold);border:1px solid var(--gold);cursor:pointer;
+    padding:15px 30px;border-radius:2px;transition:.28s;display:inline-block;text-align:center;
+  }
+  .cta-lg:hover{background:var(--gold-soft);border-color:var(--gold-soft);}
+
+  .shift-grid{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:44px;}
+  .shift{
+    border:1px solid var(--line);background:linear-gradient(180deg,var(--ink-3),var(--ink-2));
+    padding:38px 36px;border-radius:3px;
+  }
+  .shift .k{font-family:var(--serif);font-style:italic;color:var(--gold);font-size:14px;letter-spacing:.08em;margin-bottom:18px;}
+  .shift h3{margin-bottom:16px;}
+  .shift p{color:var(--sage);margin:0;}
+
+  .focus .lines{max-width:56ch;}
+  .focus .aphorism{
+    font-family:var(--serif);font-size:clamp(1.5rem,3vw,2.3rem);color:var(--cream);
+    margin-top:44px;line-height:1.25;max-width:22ch;
+  }
+  .focus .aphorism span{color:var(--gold);}
+
+  .door{text-align:center;padding:130px 0;}
+  .door .h2{margin:26px auto 26px;max-width:20ch;}
+  .door p{max-width:48ch;margin:0 auto 40px;color:var(--sage);}
+
+  .page-head{padding:96px 0 20px;}
+  .page-head .display{font-size:clamp(2.2rem,5vw,3.6rem);margin-top:26px;max-width:22ch;}
+  .page-body{padding:40px 0 110px;}
+
+  .rule{height:1px;background:var(--line-soft);margin:0;border:0;}
+
+  .lines-3{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:56px;border-top:1px solid var(--line);}
+  .line-item{padding:40px 34px 40px 0;border-right:1px solid var(--line-soft);}
+  .line-item:last-child{border-right:0;padding-right:0;}
+  .line-item .no{font-family:var(--serif);font-style:italic;color:var(--gold-dim);font-size:15px;}
+  .line-item h3{margin:14px 0 14px;}
+  .line-item p{color:var(--sage);margin:0;font-size:15px;}
+  .studio-close{
+    font-family:var(--serif);font-size:clamp(1.5rem,3vw,2.2rem);color:var(--cream);
+    line-height:1.28;max-width:24ch;
+  }
+  .studio-close span{color:var(--gold);}
+  .studio-lead-p{color:var(--sage);margin-top:26px;max-width:62ch;}
+
+  /* portfolio + opportunities cards */
+  .pf-section + .pf-section{margin-top:84px;}
+  .pf-section-head{margin-bottom:8px;}
+  .pf-section-intro{color:var(--sage);max-width:62ch;font-size:15px;margin:18px 0 0;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:32px;}
+  .ocard{
+    position:relative;border:1px solid var(--line);border-radius:3px;
+    padding:28px 28px 26px;background:linear-gradient(180deg,var(--ink-3),var(--ink-2));
+    display:flex;flex-direction:column;min-height:236px;
+    transition:border-color .3s, transform .3s;
+  }
+  .ocard:hover{border-color:var(--gold-dim);transform:translateY(-2px);}
+  .ocard-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:24px;}
+  .mono{
+    width:52px;height:52px;border-radius:50%;border:1px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;flex:none;
+    font-family:var(--serif);color:var(--gold);font-size:14px;letter-spacing:.03em;
+  }
+  .otag{
+    font-family:'Courier New',ui-monospace,monospace;font-size:10.5px;letter-spacing:.09em;
+    color:var(--gold);border:1px solid var(--line-soft);background:rgba(0,0,0,.20);
+    padding:6px 10px;border-radius:2px;text-align:right;line-height:1.35;max-width:190px;
+  }
+  .oname{font-family:var(--serif);font-size:1.28rem;color:var(--cream);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;}
+  .odesc{color:var(--sage);font-size:14.5px;margin:0 0 auto;line-height:1.5;}
+  .ostatus{color:var(--live);font-size:13px;font-weight:500;margin-top:22px;}
+  .ovisit{color:var(--gold);font-size:13.5px;margin-top:12px;display:inline-block;}
+  .ovisit:hover{color:var(--gold-soft);}
+  .onote{color:var(--sage-dim);font-size:12px;margin-top:12px;font-style:italic;font-family:var(--serif);}
+
+  .gp-grid{display:grid;grid-template-columns:1fr 1fr;gap:46px;margin-top:52px;}
+  .gp .gpname{font-family:var(--serif);font-size:1.7rem;color:var(--cream);}
+  .gp .gprole{font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin:10px 0 20px;}
+  .gp p{color:var(--sage);font-size:15px;margin:0;}
+
+  .intent{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:52px;}
+  .intent-card{border:1px solid var(--line);border-radius:3px;padding:34px 30px;background:var(--ink-2);}
+  .intent-card.feature{border-color:var(--gold-dim);background:linear-gradient(180deg,var(--ink-3),var(--ink-2));}
+  .intent-card .ic-label{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:18px;}
+  .intent-card h3{font-size:1.25rem;margin-bottom:14px;}
+  .intent-card p{color:var(--sage);font-size:14.5px;margin:0 0 22px;}
+  .intent-card a.mail{color:var(--gold-soft);font-size:14px;letter-spacing:.02em;border-bottom:1px solid var(--line);padding-bottom:2px;}
+  .intent-card a.mail:hover{color:var(--gold);}
+
+  footer{border-top:1px solid var(--line-soft);padding:40px 0;margin-top:0;}
+  .foot-inner{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;}
+  .foot-inner .fnames{font-size:13px;color:var(--sage);}
+  .foot-inner .fnames b{color:var(--cream);font-weight:500;}
+  .foot-inner .fnames a{color:var(--gold-dim);}
+  .foot-conf{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--sage-dim);}
+  .legal{max-width:var(--maxw);margin:0 auto;padding:0 40px 44px;font-size:11px;color:var(--sage-dim);line-height:1.7;}
+
+  .reveal{transition:opacity .8s ease, transform .8s ease;}
+  html.js .reveal{opacity:0;transform:translateY(18px);}
+  html.js .reveal.in{opacity:1;transform:none;}
+
+  @media(max-width:980px){ .grid3{grid-template-columns:1fr 1fr;} }
+  @media(max-width:860px){
+    .wrap{padding:0 24px;}
+    .nav-inner{padding:14px 24px;}
+    nav.links{position:fixed;inset:64px 0 auto 0;flex-direction:column;align-items:stretch;
+      background:var(--ink-2);border-bottom:1px solid var(--line);padding:14px 24px 22px;gap:2px;
+      transform:translateY(-140%);transition:transform .35s ease;}
+    nav.links.open{transform:none;}
+    .navlink{text-align:left;padding:14px 6px;font-size:13px;}
+    .btn-access{margin:12px 0 0;width:100%;padding:15px;display:block;}
+    .menu-toggle{display:block;}
+    .shift-grid,.intent,.lines-3,.gp-grid{grid-template-columns:1fr;}
+    .line-item{border-right:0;border-bottom:1px solid var(--line-soft);padding:32px 0;}
+    .line-item:last-child{border-bottom:0;}
+    .hero{padding:80px 0 70px;}
+    .stratum{padding:76px 0;}
+    .door{padding:90px 0;}
+    .brand .name{font-size:14px;letter-spacing:.1em;}
+    .brand .tag{display:none;}
+  }
+  @media(max-width:640px){ .grid3{grid-template-columns:1fr;} }
+
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important;scroll-behavior:auto!important;}
+    .reveal{opacity:1!important;transform:none!important;}
+  }
+  :focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="https://aurelianlabs.ai" aria-label="Back to Aurelian Labs">
+      <svg class="mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <rect x="1" y="1" width="38" height="38" rx="2" stroke="#c7a961" stroke-width="1.2"/>
+        <rect x="5.5" y="5.5" width="29" height="29" rx="1" stroke="#c7a961" stroke-width=".5" opacity=".5"/>
+        <rect x="13" y="11" width="14" height="2.4" fill="#c7a961"/>
+        <rect x="14.4" y="13.4" width="11.2" height="1.6" fill="#c7a961" opacity=".85"/>
+        <rect x="15.2" y="15" width="1.5" height="12" fill="#c7a961"/>
+        <rect x="18.1" y="15" width="1.5" height="12" fill="#c7a961"/>
+        <rect x="21" y="15" width="1.5" height="12" fill="#c7a961"/>
+        <rect x="23.9" y="15" width="1.5" height="12" fill="#c7a961"/>
+        <rect x="14.4" y="27" width="11.2" height="1.8" fill="#c7a961" opacity=".85"/>
+        <rect x="13" y="28.8" width="14" height="2.4" fill="#c7a961"/>
+      </svg>
+      <span class="wordmark">
+        <span class="name">Aurelian Ventures</span>
+        <span class="tag">Capital · Intelligence · Legacy</span>
+      </span>
+    </a>
+
+    <div style="display:flex;align-items:center;">
+      <nav class="links" id="links">
+        <button class="navlink" data-tab="studio">Studio</button>
+        <button class="navlink" data-tab="portfolio">Portfolio</button>
+        <button class="navlink" data-tab="team">Team</button>
+        <button class="navlink" data-tab="contact">Contact</button>
+        <a class="btn-access" href="mailto:contact@aurelianlabs.ai?subject=Aurelian%20Ventures%20Fund%20I%20Enquiry">Request access</a>
+      </nav>
+      <button class="menu-toggle" id="menuToggle" aria-label="Menu" aria-expanded="false">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ HOME ============ -->
+<section class="page active" id="home">
+
+  <div class="hero">
+    <div class="wrap reveal">
+      <span class="eyebrow">Aurelian Ventures Fund I · New York</span>
+      <h1 class="display">The foundations of the next era are being rebuilt</h1>
+      <p class="lead">Compute, settlement, and intelligence. The infrastructure the coming decade will run on is being built now, by a small number of teams still largely unknown to the market.</p>
+      <p class="loss">Foundational infrastructure is laid quietly, and early. By the time the names are familiar, the positions are already set.</p>
+      <div class="hero-cta">
+        <a class="cta-lg" href="mailto:contact@aurelianlabs.ai?subject=Aurelian%20Ventures%20Fund%20I%20Enquiry">Request access</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="stratum">
+    <div class="wrap reveal">
+      <div class="stratum-head"><span class="eyebrow">The studio</span></div>
+      <h2 class="h2 body-col">First institutional capital, at the founding round</h2>
+      <div class="body-col" style="margin-top:26px;">
+        <p>Aurelian Ventures is a New York studio that invests at the founding round of teams rebuilding the foundational layers of technology. We know these founders directly, and have spent the past year working alongside them as they build and deploy.</p>
+        <p class="muted">That proximity lets us commit early, as the first institutional capital these teams take, before they are widely visible.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="stratum">
+    <div class="wrap reveal">
+      <div class="stratum-head"><span class="eyebrow">What we back</span></div>
+      <h2 class="h2 body-col">The layer the rest is built on</h2>
+      <p class="muted body-col" style="margin-top:24px;">We invest one layer beneath the applications and platforms most capital competes for, in the infrastructure that other systems come to depend on. Foundational, not featural.</p>
+      <div class="shift-grid">
+        <div class="shift">
+          <div class="k">Compute</div>
+          <h3 class="h3">Making intelligence cheaper at the source</h3>
+          <p>Teams taking requirements the industry treats as fixed and reducing them, bending the economics that govern data centers and AI.</p>
+        </div>
+        <div class="shift">
+          <div class="k">Settlement</div>
+          <h3 class="h3">Making institutional transactions provable</h3>
+          <p>A protocol earning the trust of the institutions that ran the prior settlement rails, rebuilding proof and settlement for banks and, increasingly, for machines.</p>
+        </div>
+      </div>
+      <p class="muted" style="margin-top:34px;font-style:italic;font-family:var(--serif);">Different industries, different teams, one underlying shift</p>
+    </div>
+  </div>
+
+  <div class="stratum focus">
+    <div class="wrap reveal">
+      <div class="stratum-head"><span class="eyebrow">Focus</span></div>
+      <div class="lines">
+        <h2 class="h2">A deliberately narrow mandate</h2>
+        <p class="lead" style="margin-top:26px;">We hold a small number of positions, at one layer of the stack, with founders we know well. The narrowness is the point. Depth and proximity are the advantage, and neither scales.</p>
+        <p class="muted" style="margin-top:22px;max-width:56ch;">Held closely, these companies increasingly reinforce one another, a pattern more visible from inside the portfolio than from outside it.</p>
+      </div>
+      <p class="aphorism">We would rather <span>own the foundation than rent the surface</span></p>
+    </div>
+  </div>
+
+  <div class="door">
+    <div class="wrap reveal">
+      <span class="eyebrow center">Enquiries</span>
+      <h2 class="h2">An introduction</h2>
+      <p>We work with a small number of families and institutions who take a long view of foundational technology. If this is the layer you want exposure to, we would welcome a conversation.</p>
+      <a class="cta-lg" href="mailto:contact@aurelianlabs.ai?subject=Aurelian%20Ventures%20Fund%20I%20Enquiry">Request access</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STUDIO ============ -->
+<section class="page" id="studio">
+  <div class="wrap">
+    <div class="page-head reveal">
+      <span class="eyebrow">The Studio</span>
+      <h1 class="display">An operating studio, built for the foundation layer</h1>
+    </div>
+    <hr class="rule">
+    <div class="page-body">
+      <div class="body-col reveal">
+        <p class="lead">The foundational layers of technology are being rebuilt, and the teams doing it are reachable to those already close to the work.</p>
+        <p class="studio-lead-p">Until now, Aurelian Ventures has deployed its own time and capital alongside these teams. Fund I formalizes that work into an investment vehicle, so a small group of families and institutions can invest at the founding round rather than read about these companies later.</p>
+      </div>
+
+      <div class="lines-3 reveal">
+        <div class="line-item">
+          <span class="no">Invest</span>
+          <h3 class="h3">Fund I</h3>
+          <p>First institutional capital in the founding rounds of teams rebuilding compute, settlement, and intelligence.</p>
+        </div>
+        <div class="line-item">
+          <span class="no">Build</span>
+          <h3 class="h3">In-house</h3>
+          <p>We create companies ourselves where we see a foundation missing and the right team not yet formed.</p>
+        </div>
+        <div class="line-item">
+          <span class="no">Advise</span>
+          <h3 class="h3">Capital markets</h3>
+          <p>We advise institutions navigating the same shift from the capital markets side, which shows us where demand is forming before it becomes visible.</p>
+        </div>
+      </div>
+
+      <p class="muted reveal" style="margin-top:64px;max-width:64ch;">The three reinforce one another. Building teaches us what to look for. Advising shows us where demand is forming. Investing places us beside founders early.</p>
+      <p class="studio-close reveal" style="margin-top:24px;">Proximity does not scale, and <span>proximity is the entire advantage</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PORTFOLIO ============ -->
+<section class="page" id="portfolio">
+  <div class="wrap">
+    <div class="page-head reveal">
+      <span class="eyebrow">Portfolio</span>
+      <h1 class="display">Opportunities, and what we've built</h1>
+    </div>
+    <hr class="rule">
+    <div class="page-body">
+
+      <!-- Current Opportunities -->
+      <div class="pf-section reveal">
+        <div class="pf-section-head">
+          <span class="eyebrow">Current Opportunities</span>
+          <p class="pf-section-intro">Founding-round positions in the current fund pipeline. Companies are named in diligence.</p>
+        </div>
+        <div class="grid3">
+          <div class="ocard">
+            <div class="ocard-top"><span class="mono">I</span><span class="otag">Compute &amp; Data Infrastructure</span></div>
+            <div class="oname">Data-Center Efficiency Layer</div>
+            <p class="odesc">Software that collapses the storage and compute an operator needs to serve the same workload, anchored by a multi-year commercial agreement with a U.S. data-center operator.</p>
+            <div class="ostatus">Commercial Traction</div>
+            <div class="onote">First institutional round · Named in diligence</div>
+          </div>
+          <div class="ocard">
+            <div class="ocard-top"><span class="mono">II</span><span class="otag">AI Runtime Infrastructure</span></div>
+            <div class="oname">Model Runtime</div>
+            <p class="odesc">A proprietary runtime aimed at extending what today's models can hold, and how reliably they behave, on standard hardware.</p>
+            <div class="ostatus">Research Stage</div>
+            <div class="onote">First institutional round · Named in diligence</div>
+          </div>
+          <div class="ocard">
+            <div class="ocard-top"><span class="mono">III</span><span class="otag">Settlement &amp; Coordination Infrastructure</span></div>
+            <div class="oname">Execution-Proof Protocol</div>
+            <p class="odesc">A permissioned protocol letting institutions prove what was authorized, executed, and settled, without trusting any single party. Consensus independently reviewed; carrier-hardware validation underway.</p>
+            <div class="ostatus">Consensus Validated</div>
+            <div class="onote">First institutional round · Named in diligence</div>
+          </div>
+          <div class="ocard">
+            <div class="ocard-top"><span class="mono">IV</span><span class="otag">Institutional Settlement Infrastructure</span></div>
+            <div class="oname">On-Chain Settlement Orchestration</div>
+            <p class="odesc">Orchestration for the institutional repo and collateral market: shared-state settlement, an immutable audit trail, near-instant settlement, near-zero failure risk.</p>
+            <div class="ostatus">In Development</div>
+            <div class="onote">First institutional round · Named in diligence</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Current Portfolio -->
+      <div class="pf-section reveal">
+        <div class="pf-section-head">
+          <span class="eyebrow">Current Portfolio</span>
+          <p class="pf-section-intro">Companies built and backed through the studio.</p>
+        </div>
+        <div class="grid3">
+          <div class="ocard">
+            <div class="ocard-top"><span class="mono">HBH</span><span class="otag">Consumer Financial Infrastructure</span></div>
+            <div class="oname">Homebuyer Help</div>
+            <p class="odesc">AI-powered platform optimizing financing pathways for first-time homebuyers.</p>
+            <div class="ostatus">Live Beta</div>
+            <a class="ovisit" href="#">Visit Site →</a>
+          </div>
+          <div class="ocard">
+            <div class="ocard-top"><span class="mono">AL</span><span class="otag">Financial Market Infrastructure</span></div>
+            <div class="oname">Aurelian Link</div>
+            <p class="odesc">Institutional repo and secured funding rails with automated credit and collateral workflows.</p>
+            <div class="ostatus">Prototype Development</div>
+          </div>
+          <div class="ocard">
+            <div class="ocard-top"><span class="mono">LC</span><span class="otag">AI Developer Infrastructure</span></div>
+            <div class="oname">LingCode</div>
+            <p class="odesc">AI-native environment for building and deploying production software through agentic workflows.</p>
+            <div class="ostatus">Active Development</div>
+            <a class="ovisit" href="#">Visit Site →</a>
+          </div>
+          <div class="ocard">
+            <div class="ocard-top"><span class="mono">QB</span><span class="otag">Agentic Blockchain Infrastructure</span></div>
+            <div class="oname">Qubit Labs</div>
+            <p class="odesc">AI-native L1 optimized for HFT for high-performance decentralized agentic trading.</p>
+            <div class="ostatus">Active Deployment</div>
+            <a class="ovisit" href="#">Visit Site →</a>
+          </div>
+          <div class="ocard">
+            <div class="ocard-top"><span class="mono">CC</span><span class="otag">Capital Intelligence Infrastructure</span></div>
+            <div class="oname">CapCure</div>
+            <p class="odesc">Investor intelligence platform aligning companies with strategically relevant capital.</p>
+            <div class="ostatus">Prototype Development</div>
+            <a class="ovisit" href="#">Visit Site →</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ TEAM ============ -->
+<section class="page" id="team">
+  <div class="wrap">
+    <div class="page-head reveal">
+      <span class="eyebrow">The Team</span>
+      <h1 class="display">The people behind Aurelian Ventures</h1>
+    </div>
+    <hr class="rule">
+    <div class="page-body">
+      <div class="gp-grid reveal">
+        <div class="gp">
+          <div class="gpname">Nathaniel Norman</div>
+          <div class="gprole">Co-founder &amp; GP · Fintech</div>
+          <p>Founded and led companies across fintech and deeptech AI infrastructure, with a network spanning traditional finance, institutional capital markets, and blockchain. Has worked both sides of the table, building and shipping as well as backing. Brings the capital-markets depth and operator instinct to judge which infrastructure-layer bets are real before the market does.</p>
+        </div>
+        <div class="gp">
+          <div class="gpname">Ishita Wadhwa</div>
+          <div class="gprole">Co-founder &amp; GP · Deeptech</div>
+          <p>Built at the intersection of emerging technology and company creation, with deep roots in technical communities of developers, engineers, and founding teams. Has taken companies from zero to fundable and beyond. Brings the technical lens that turns engineering conviction into business outcomes, and the network that surfaces founders before they are visible to institutional capital.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section class="page" id="contact">
+  <div class="wrap">
+    <div class="page-head reveal">
+      <span class="eyebrow">Contact</span>
+      <h1 class="display">Ways to reach us</h1>
+    </div>
+    <hr class="rule">
+    <div class="page-body">
+      <div class="intent reveal">
+        <div class="intent-card feature">
+          <div class="ic-label">Families &amp; institutions</div>
+          <h3>Request access</h3>
+          <p>We work with a small number of families and institutions who take a long view of foundational technology. If this is the layer you want exposure to, we would welcome an introduction.</p>
+          <a class="mail" href="mailto:contact@aurelianlabs.ai?subject=Aurelian%20Ventures%20Fund%20I%20Enquiry">contact@aurelianlabs.ai</a>
+        </div>
+        <div class="intent-card">
+          <div class="ic-label">Founders</div>
+          <h3>Building at the foundation</h3>
+          <p>If you are rebuilding a foundational layer of compute, settlement, or intelligence, we would like to meet you early, before you run a process.</p>
+          <a class="mail" href="mailto:contact@aurelianlabs.ai?subject=Founder%20Enquiry%20—%20Aurelian%20Ventures">contact@aurelianlabs.ai</a>
+        </div>
+        <div class="intent-card">
+          <div class="ic-label">Press &amp; partnerships</div>
+          <h3>Everything else</h3>
+          <p>Media, partners, and counterparties can reach us here.</p>
+          <a class="mail" href="mailto:contact@aurelianlabs.ai?subject=Aurelian%20Ventures%20Partnerships">contact@aurelianlabs.ai</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap foot-inner">
+    <div class="fnames"><b>Aurelian Ventures</b> · New York &nbsp;·&nbsp; <a href="mailto:contact@aurelianlabs.ai">contact@aurelianlabs.ai</a></div>
+    <div class="foot-conf">Capital · Intelligence · Legacy</div>
+  </div>
+</footer>
+<div class="legal">
+  Aurelian Ventures is an operating studio. This site is for general information about the studio and does not constitute an offer to sell, or a solicitation of an offer to buy, any security. Any offering of interests in Aurelian Ventures Fund I is made solely to qualified investors through the fund's definitive offering documents. Forward-looking statements are not guarantees, and past activity is not indicative of future results.
+</div>
+
+<script>
+(function(){
+  document.documentElement.classList.add('js');
+  var tabs = document.querySelectorAll('[data-tab]');
+  var pages = document.querySelectorAll('.page');
+  var navlinks = document.querySelectorAll('.navlink');
+  var links = document.getElementById('links');
+  var toggle = document.getElementById('menuToggle');
+
+  function show(id){
+    pages.forEach(function(p){ p.classList.toggle('active', p.id===id); });
+    navlinks.forEach(function(n){ n.setAttribute('aria-current', n.getAttribute('data-tab')===id ? 'true':'false'); });
+    window.scrollTo({top:0, behavior:'auto'});
+    links.classList.remove('open');
+    toggle.setAttribute('aria-expanded','false');
+    runReveal();
+  }
+
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){ show(t.getAttribute('data-tab')); });
+  });
+
+  toggle.addEventListener('click', function(){
+    var open = links.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', open ? 'true':'false');
+  });
+
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {threshold:0.12});
+  var revealSafety;
+  function runReveal(){
+    document.querySelectorAll('.page.active .reveal:not(.in)').forEach(function(el){ io.observe(el); });
+    clearTimeout(revealSafety);
+    revealSafety = setTimeout(function(){
+      document.querySelectorAll('.page.active .reveal').forEach(function(el){ el.classList.add('in'); });
+    }, 1600);
+  }
+  runReveal();
+})();
+</script>
+</body>
+</html>
