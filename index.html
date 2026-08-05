@@ -143,6 +143,8 @@
 
   /* ---- ledger index: roman numeral in the gutter, Aurelian's own device ---- */
   .idx-group{padding-top:72px;}
+  /* label lives inside the existing 80px gap: 35 + label 19 + collapsed 26 = 80 */
+  .idx-group--labelled{padding-top:35px;}
   /* first group has no label, so it needs less clearance under the rule */
   .page-body > .idx-group:first-child{padding-top:52px;}
   .idx-label{
@@ -399,8 +401,9 @@
         </ul>
       </div>
 
-      <!-- 2. how the incubator works (labels carry it, no heading needed) -->
-      <div class="idx-group reveal">
+      <!-- 2. how the incubator works -->
+      <div class="idx-group idx-group--labelled reveal">
+        <div class="idx-label">Incubator</div>
         <div class="lines-3">
           <div class="line-item">
             <span class="no">Invest</span>
