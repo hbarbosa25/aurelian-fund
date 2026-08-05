@@ -136,6 +136,9 @@
   .page-head{padding:104px 0 40px;}
   .page-head .display{max-width:22ch;}
   .page-body{padding:0 0 112px;}
+  /* portfolio has no heading, so the body supplies the top space itself */
+  .page-body.no-head{padding-top:78px;}
+  .page-body.no-head > .idx-group:first-child{padding-top:0;}
   .rule{height:1px;background:var(--line-soft);margin:0;border:0;}
 
   /* ---- ledger index: roman numeral in the gutter, Aurelian's own device ---- */
@@ -262,6 +265,7 @@
 
     .hero{min-height:78vh;padding-bottom:64px;}
     .page-head{padding:72px 0 32px;}
+    .page-body.no-head{padding-top:48px;}
     .idx-group{padding-top:56px;}
     .index .row{flex-direction:column;gap:12px;padding:26px 4px;}
     .index .imeta{gap:18px;white-space:normal;}
@@ -326,11 +330,7 @@
 <!-- ============ PORTFOLIO (absorbs the incubator) ============ -->
 <section class="page" id="portfolio">
   <div class="wrap">
-    <div class="page-head reveal">
-      <h1 class="display">An operating incubator, built for the foundation layer</h1>
-    </div>
-    <hr class="rule">
-    <div class="page-body">
+    <div class="page-body no-head">
 
       <!-- 1. what we've built -->
       <div class="idx-group reveal">
