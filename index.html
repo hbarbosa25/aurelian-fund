@@ -56,7 +56,6 @@
   a{color:inherit;text-decoration:none;}
   ::selection{background:rgba(199,169,97,.28);color:#fff;}
 
-  /* full-bleed: content runs to the edges, no centered column */
   .wrap{width:100%;margin:0;padding:0 var(--pad);position:relative;z-index:1;}
 
   .eyebrow{
@@ -115,7 +114,6 @@
   .page.active{display:block;animation:pageIn .5s ease both;}
   @keyframes pageIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
 
-  /* hero — one line, bottom-weighted */
   .hero{
     min-height:calc(100vh - 91px);
     display:flex;align-items:flex-end;
@@ -126,58 +124,70 @@
     max-width:19ch;margin:0;
   }
 
-  .page-head{padding:96px 0 20px;}
-  .page-head .display{font-size:clamp(2.2rem,5vw,3.6rem);margin-top:26px;max-width:22ch;}
-  .page-body{padding:40px 0 104px;}
+  .page-head{padding:104px 0 40px;}
+  .page-head .display{font-size:clamp(2.2rem,5vw,3.6rem);max-width:22ch;}
+  .page-body{padding:0 0 112px;}
   .rule{height:1px;background:var(--line-soft);margin:0;border:0;}
 
-  /* company index — the list carries the page */
-  .idx-group + .idx-group{margin-top:86px;}
-  .idx-head{margin-bottom:30px;}
-  .idx-note{color:var(--sage);font-size:14px;margin:16px 0 0;}
+  /* ---- ledger index: roman numeral in the gutter, Aurelian's own device ---- */
+  .idx-group{padding-top:72px;}
+  /* first group has no label, so it needs less clearance under the rule */
+  .page-body > .idx-group:first-child{padding-top:40px;}
+  .idx-label{
+    font-size:11px;font-weight:500;letter-spacing:.32em;text-transform:uppercase;
+    color:var(--gold);margin-bottom:12px;
+  }
+  .idx-note{color:var(--sage);font-size:14px;margin:0 0 34px;max-width:64ch;}
   .index{list-style:none;margin:0;padding:0;border-top:1px solid var(--line-soft);}
   .index li{border-bottom:1px solid var(--line-soft);}
   .index .row{
-    display:flex;align-items:baseline;justify-content:space-between;gap:40px;
-    padding:32px 4px;transition:padding .34s ease;
+    display:flex;align-items:baseline;justify-content:space-between;gap:48px;
+    padding:36px 4px;transition:padding .34s ease;
   }
-  .index a.row:hover{padding-left:18px;}
+  .index a.row:hover{padding-left:16px;}
+  .index .ilead{display:flex;align-items:baseline;gap:28px;min-width:0;}
+  .index .inum{
+    font-family:var(--serif);font-style:italic;font-size:15px;
+    color:var(--gold-dim);width:26px;flex:none;
+    font-variant-numeric:tabular-nums;
+  }
   .index .iname{
     font-family:var(--serif);font-size:clamp(1.5rem,3.1vw,2.3rem);
     color:var(--cream);line-height:1.1;transition:color .28s ease;
   }
   .index a.row:hover .iname{color:var(--gold);}
   .index .imeta{
-    display:flex;align-items:baseline;gap:26px;flex:none;
+    display:flex;align-items:baseline;gap:28px;flex:none;
     font-size:12px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;
   }
   .index .isector{color:var(--sage-dim);}
   .index .istatus{color:var(--live);}
 
-  .lines-3{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:56px;border-top:1px solid var(--line);}
-  .page-body > .lines-3:first-child{margin-top:8px;}
-  .line-item{padding:40px 40px 40px 0;border-right:1px solid var(--line-soft);}
+  /* ---- three-column band: text must clear the rules ---- */
+  .lines-3{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:0;
+    margin-top:8px;border-top:1px solid var(--line-soft);
+  }
+  .line-item{padding:48px;border-right:1px solid var(--line-soft);}
+  .line-item:first-child{padding-left:0;}
   .line-item:last-child{border-right:0;padding-right:0;}
   .line-item .no{font-family:var(--serif);font-style:italic;color:var(--gold-dim);font-size:15px;}
-  .line-item h3{margin:14px 0 14px;}
-  .line-item p{color:var(--sage);margin:0;font-size:15px;max-width:44ch;}
+  .line-item h3{margin:16px 0 16px;}
+  .line-item p{color:var(--sage);margin:0;font-size:15px;max-width:42ch;}
 
-  .gp-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;margin-top:52px;}
+  .gp-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;margin-top:16px;}
   .gp .gpname{font-family:var(--serif);font-size:1.7rem;color:var(--cream);}
-  .gp .gprole{font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin:10px 0 20px;}
+  .gp .gprole{font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin:12px 0 22px;}
   .gp p{color:var(--sage);font-size:15px;margin:0;max-width:58ch;}
 
-  /* ============ FOOTER — own colour band ============ */
+  /* ---- footer ---- */
   footer{
     background:var(--foot);
     border-top:1px solid var(--line-soft);
     position:relative;z-index:1;
     padding:46px var(--pad) 24px;
   }
-  .foot-top{
-    display:flex;align-items:flex-start;justify-content:space-between;
-    gap:40px;flex-wrap:wrap;
-  }
+  .foot-top{display:flex;align-items:flex-start;justify-content:space-between;gap:40px;flex-wrap:wrap;}
   .foot-cta{display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
   .foot-h{font-family:var(--serif);font-size:clamp(1.55rem,2.7vw,2.15rem);color:var(--cream);}
   .foot-btn{
@@ -187,7 +197,6 @@
     transition:.28s;display:inline-block;white-space:nowrap;
   }
   .foot-btn:hover{background:var(--gold-soft);border-color:var(--gold-soft);}
-
   .foot-right{display:flex;flex-direction:column;align-items:flex-end;gap:12px;text-align:right;}
   .foot-id{display:flex;align-items:center;gap:14px;}
   .foot-id img{width:34px;height:34px;flex:none;}
@@ -199,7 +208,6 @@
     text-transform:uppercase;color:var(--sage);transition:color .25s;
   }
   .foot-links a:hover,.foot-links button:hover{color:var(--gold);}
-
   .foot-base{
     display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;
     margin-top:26px;padding-top:16px;border-top:1px solid rgba(199,169,97,0.10);
@@ -214,6 +222,7 @@
 
   @media(max-width:1100px){
     :root{--pad:34px;}
+    .line-item{padding:40px;}
   }
   @media(max-width:860px){
     :root{--pad:22px;}
@@ -228,18 +237,23 @@
     .btn-access{margin:12px 0 0;width:100%;padding:15px;display:block;}
     .menu-toggle{display:block;}
     .lines-3,.gp-grid{grid-template-columns:1fr;}
-    .line-item{border-right:0;border-bottom:1px solid var(--line-soft);padding:32px 0;}
+    .line-item{border-right:0;border-bottom:1px solid var(--line-soft);padding:36px 0;}
+    .line-item:first-child{padding-left:0;}
     .line-item:last-child{border-bottom:0;}
+    .gp-grid{gap:44px;}
     .hero{min-height:78vh;padding-bottom:64px;}
-    .index .row{flex-direction:column;gap:10px;padding:24px 4px;}
-    .index .imeta{gap:16px;white-space:normal;}
+    .page-head{padding:72px 0 32px;}
+    .idx-group{padding-top:56px;}
+    .index .row{flex-direction:column;gap:12px;padding:26px 4px;}
+    .index .imeta{gap:18px;white-space:normal;}
+    .index .ilead{gap:18px;}
+    .index .inum{width:20px;}
     .foot-top{flex-direction:column;gap:24px;}
     .foot-right{align-items:flex-start;text-align:left;}
     .foot-links{justify-content:flex-start;}
     footer{padding-top:40px;}
   }
   @media(max-width:520px){
-    /* heading + button still fit side by side at 375px, so don't force a wrap */
     .foot-cta{gap:18px;}
     .foot-h{font-size:1.5rem;}
     .foot-btn{padding:11px 20px;letter-spacing:.14em;}
@@ -270,7 +284,6 @@
     <div style="display:flex;align-items:center;">
       <nav class="links" id="links">
         <button class="navlink" data-tab="portfolio">Portfolio</button>
-        <button class="navlink" data-tab="studio">Incubator</button>
         <button class="navlink" data-tab="team">Team</button>
         <a class="btn-access" href="mailto:contact@aurelianlabs.ai?subject=Aurelian%20Ventures%20Fund%20I%20Enquiry">Request access</a>
       </nav>
@@ -292,100 +305,24 @@
   </div>
 </section>
 
-<!-- ============ INCUBATOR ============ -->
-<section class="page" id="studio">
+<!-- ============ PORTFOLIO (absorbs the incubator) ============ -->
+<section class="page" id="portfolio">
   <div class="wrap">
     <div class="page-head reveal">
-      <span class="eyebrow">The Incubator</span>
       <h1 class="display">An operating incubator, built for the foundation layer</h1>
     </div>
     <hr class="rule">
     <div class="page-body">
-      <div class="lines-3 reveal">
-        <div class="line-item">
-          <span class="no">Invest</span>
-          <h3 class="h3">Fund I</h3>
-          <p>First institutional capital in the founding rounds of teams rebuilding compute, settlement, and intelligence.</p>
-        </div>
-        <div class="line-item">
-          <span class="no">Build</span>
-          <h3 class="h3">In-house</h3>
-          <p>We create companies ourselves where a foundation is missing and the right team is not yet formed.</p>
-        </div>
-        <div class="line-item">
-          <span class="no">Advise</span>
-          <h3 class="h3">Capital markets</h3>
-          <p>We advise institutions navigating the same shift, which shows us where demand is forming early.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
 
-<!-- ============ PORTFOLIO ============ -->
-<section class="page" id="portfolio">
-  <div class="wrap">
-    <div class="page-head reveal">
-      <span class="eyebrow">Portfolio</span>
-      <h1 class="display">Opportunities, and what we've built</h1>
-    </div>
-    <hr class="rule">
-    <div class="page-body">
-
+      <!-- 1. what we've built -->
       <div class="idx-group reveal">
-        <div class="idx-head">
-          <span class="eyebrow">Current Opportunities</span>
-          <p class="idx-note">Founding-round positions in the current fund pipeline. Companies are named in diligence.</p>
-        </div>
-        <ul class="index">
-          <li>
-            <div class="row">
-              <span class="iname">Data-Center Efficiency Layer</span>
-              <span class="imeta">
-                <span class="isector">Compute &amp; data</span>
-                <span class="istatus">Commercial traction</span>
-              </span>
-            </div>
-          </li>
-          <li>
-            <div class="row">
-              <span class="iname">Model Runtime</span>
-              <span class="imeta">
-                <span class="isector">AI runtime</span>
-                <span class="istatus">Research stage</span>
-              </span>
-            </div>
-          </li>
-          <li>
-            <div class="row">
-              <span class="iname">Execution-Proof Protocol</span>
-              <span class="imeta">
-                <span class="isector">Settlement &amp; coordination</span>
-                <span class="istatus">Consensus validated</span>
-              </span>
-            </div>
-          </li>
-          <li>
-            <div class="row">
-              <span class="iname">On-Chain Settlement Orchestration</span>
-              <span class="imeta">
-                <span class="isector">Institutional settlement</span>
-                <span class="istatus">In development</span>
-              </span>
-            </div>
-          </li>
-        </ul>
-      </div>
-
-      <div class="idx-group reveal">
-        <div class="idx-head">
-          <span class="eyebrow">Current Portfolio</span>
-          <p class="idx-note">Companies built and backed through the incubator.</p>
-        </div>
         <ul class="index">
           <li>
             <a class="row" href="https://homebuyerhelp.ai" target="_blank" rel="noopener">
-              <span class="iname">Homebuyer Help</span>
+              <span class="ilead">
+                <span class="inum">I</span>
+                <span class="iname">Homebuyer Help</span>
+              </span>
               <span class="imeta">
                 <span class="isector">Consumer finance</span>
                 <span class="istatus">Live beta</span>
@@ -394,7 +331,10 @@
           </li>
           <li>
             <a class="row" href="https://aurelianlink.com" target="_blank" rel="noopener">
-              <span class="iname">Aurelian Link</span>
+              <span class="ilead">
+                <span class="inum">II</span>
+                <span class="iname">Aurelian Link</span>
+              </span>
               <span class="imeta">
                 <span class="isector">Market infrastructure</span>
                 <span class="istatus">Prototype</span>
@@ -403,7 +343,10 @@
           </li>
           <li>
             <a class="row" href="https://lingcode.dev" target="_blank" rel="noopener">
-              <span class="iname">LingCode</span>
+              <span class="ilead">
+                <span class="inum">III</span>
+                <span class="iname">LingCode</span>
+              </span>
               <span class="imeta">
                 <span class="isector">Developer infrastructure</span>
                 <span class="istatus">Active development</span>
@@ -412,7 +355,10 @@
           </li>
           <li>
             <a class="row" href="https://qubit.trade/perpetual" target="_blank" rel="noopener">
-              <span class="iname">Qubit Labs</span>
+              <span class="ilead">
+                <span class="inum">IV</span>
+                <span class="iname">Qubit Labs</span>
+              </span>
               <span class="imeta">
                 <span class="isector">Blockchain infrastructure</span>
                 <span class="istatus">Active deployment</span>
@@ -421,12 +367,92 @@
           </li>
           <li>
             <a class="row" href="https://www.capcure.co" target="_blank" rel="noopener">
-              <span class="iname">CapCure</span>
+              <span class="ilead">
+                <span class="inum">V</span>
+                <span class="iname">CapCure</span>
+              </span>
               <span class="imeta">
                 <span class="isector">Capital intelligence</span>
                 <span class="istatus">Prototype</span>
               </span>
             </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 2. how the incubator works (labels carry it, no heading needed) -->
+      <div class="idx-group reveal">
+        <div class="lines-3">
+          <div class="line-item">
+            <span class="no">Invest</span>
+            <h3 class="h3">Fund I</h3>
+            <p>First institutional capital in the founding rounds of teams rebuilding compute, settlement, and intelligence.</p>
+          </div>
+          <div class="line-item">
+            <span class="no">Build</span>
+            <h3 class="h3">In-house</h3>
+            <p>We create companies ourselves where a foundation is missing and the right team is not yet formed.</p>
+          </div>
+          <div class="line-item">
+            <span class="no">Advise</span>
+            <h3 class="h3">Capital markets</h3>
+            <p>We advise institutions navigating the same shift, which shows us where demand is forming early.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. what's in the pipeline -->
+      <div class="idx-group reveal">
+        <div class="idx-label">Current opportunities</div>
+        <p class="idx-note">Founding-round positions in the current fund pipeline. Companies are named in diligence.</p>
+        <ul class="index">
+          <li>
+            <div class="row">
+              <span class="ilead">
+                <span class="inum">VI</span>
+                <span class="iname">Data-Center Efficiency Layer</span>
+              </span>
+              <span class="imeta">
+                <span class="isector">Compute &amp; data</span>
+                <span class="istatus">Commercial traction</span>
+              </span>
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="ilead">
+                <span class="inum">VII</span>
+                <span class="iname">Model Runtime</span>
+              </span>
+              <span class="imeta">
+                <span class="isector">AI runtime</span>
+                <span class="istatus">Research stage</span>
+              </span>
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="ilead">
+                <span class="inum">VIII</span>
+                <span class="iname">Execution-Proof Protocol</span>
+              </span>
+              <span class="imeta">
+                <span class="isector">Settlement &amp; coordination</span>
+                <span class="istatus">Consensus validated</span>
+              </span>
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="ilead">
+                <span class="inum">IX</span>
+                <span class="iname">On-Chain Settlement Orchestration</span>
+              </span>
+              <span class="imeta">
+                <span class="isector">Institutional settlement</span>
+                <span class="istatus">In development</span>
+              </span>
+            </div>
           </li>
         </ul>
       </div>
@@ -439,21 +465,22 @@
 <section class="page" id="team">
   <div class="wrap">
     <div class="page-head reveal">
-      <span class="eyebrow">The Team</span>
       <h1 class="display">The people behind Aurelian Ventures</h1>
     </div>
     <hr class="rule">
     <div class="page-body">
-      <div class="gp-grid reveal">
-        <div class="gp">
-          <div class="gpname">Nathaniel Norman</div>
-          <div class="gprole">Co-founder &amp; GP · Fintech</div>
-          <p>Founded and led companies across fintech and deeptech AI infrastructure, and has worked both sides of the table. Brings the capital-markets depth to judge which infrastructure bets are real before the market does.</p>
-        </div>
-        <div class="gp">
-          <div class="gpname">Ishita Wadhwa</div>
-          <div class="gprole">Co-founder &amp; GP · Deeptech</div>
-          <p>Built at the intersection of emerging technology and company creation, with deep roots in technical communities. Brings the technical lens, and the network that surfaces founders before institutional capital sees them.</p>
+      <div class="idx-group reveal">
+        <div class="gp-grid">
+          <div class="gp">
+            <div class="gpname">Nathaniel Norman</div>
+            <div class="gprole">Co-founder &amp; GP · Fintech</div>
+            <p>Founded and led companies across fintech and deeptech AI infrastructure, and has worked both sides of the table. Brings the capital-markets depth to judge which infrastructure bets are real before the market does.</p>
+          </div>
+          <div class="gp">
+            <div class="gpname">Ishita Wadhwa</div>
+            <div class="gprole">Co-founder &amp; GP · Deeptech</div>
+            <p>Built at the intersection of emerging technology and company creation, with deep roots in technical communities. Brings the technical lens, and the network that surfaces founders before institutional capital sees them.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -472,12 +499,11 @@
 
     <div class="foot-right">
       <div class="foot-id">
-        <img src="/logo.png" alt="" width="44" height="44" />
+        <img src="/logo.png" alt="" width="34" height="34" />
         <span class="fcity">New York</span>
       </div>
       <div class="foot-links">
         <button data-tab="portfolio">Portfolio</button>
-        <button data-tab="studio">Incubator</button>
         <button data-tab="team">Team</button>
         <a href="https://aurelianlabs.ai">Aurelian Labs ↗</a>
       </div>
