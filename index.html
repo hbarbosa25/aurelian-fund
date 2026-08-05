@@ -13,6 +13,7 @@
     --ink:#0D1912;
     --ink-2:#12241B;
     --ink-3:#16291F;
+    --foot:#060B08;
     --gold:#c7a961;
     --gold-soft:#d8c088;
     --gold-dim:#9c854e;
@@ -22,7 +23,7 @@
     --live:#5fae74;
     --line:rgba(199,169,97,0.22);
     --line-soft:rgba(199,169,97,0.12);
-    --maxw:1180px;
+    --pad:44px;
     --serif:'Playfair Display', Georgia, serif;
     --sans:'Instrument Sans', system-ui, -apple-system, sans-serif;
   }
@@ -38,6 +39,7 @@
     line-height:1.62;
     -webkit-font-smoothing:antialiased;
     letter-spacing:.005em;
+    overflow-x:clip;
   }
   body::before{
     content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
@@ -54,7 +56,8 @@
   a{color:inherit;text-decoration:none;}
   ::selection{background:rgba(199,169,97,.28);color:#fff;}
 
-  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 40px;position:relative;z-index:1;}
+  /* full-bleed: content runs to the edges, no centered column */
+  .wrap{width:100%;margin:0;padding:0 var(--pad);position:relative;z-index:1;}
 
   .eyebrow{
     font-family:var(--sans);
@@ -68,12 +71,7 @@
   h1,h2,h3{font-family:var(--serif);font-weight:500;line-height:1.08;margin:0;}
   .display{font-size:clamp(2.6rem,6.4vw,4.9rem);letter-spacing:-.01em;}
   .h3{font-size:clamp(1.3rem,2.4vw,1.75rem);}
-  .lead{
-    font-family:var(--serif);font-size:clamp(1.15rem,2vw,1.5rem);
-    line-height:1.5;color:var(--cream);font-weight:400;
-  }
   p{margin:0 0 1.1em;}
-  .muted{color:var(--sage);}
 
   header.nav{
     position:sticky;top:0;z-index:50;
@@ -82,19 +80,17 @@
     border-bottom:1px solid var(--line-soft);
   }
   .nav-inner{
-    max-width:var(--maxw);margin:0 auto;padding:16px 40px;
+    width:100%;padding:18px var(--pad);
     display:flex;align-items:center;justify-content:space-between;gap:24px;
   }
-  .brand{display:flex;align-items:center;gap:14px;cursor:pointer;background:none;border:0;padding:0;text-align:left;font:inherit;color:inherit;}
-  .mark{width:34px;height:34px;flex:none;}
-  .brand .wordmark{display:flex;flex-direction:column;line-height:1;}
-  .brand .name{
-    font-family:var(--serif);font-size:16px;letter-spacing:.16em;color:var(--cream);
-    text-transform:uppercase;font-weight:500;white-space:nowrap;
+  .brand{
+    display:flex;align-items:center;gap:16px;cursor:pointer;
+    background:none;border:0;padding:0;text-align:left;font:inherit;color:inherit;
   }
-  .brand .tag{
-    font-size:8.5px;letter-spacing:.30em;color:var(--gold-dim);
-    text-transform:uppercase;margin-top:5px;font-weight:500;
+  .mark{width:54px;height:54px;flex:none;}
+  .brand .name{
+    font-family:var(--serif);font-size:19px;letter-spacing:.17em;color:var(--cream);
+    text-transform:uppercase;font-weight:500;white-space:nowrap;
   }
   nav.links{display:flex;align-items:center;gap:6px;}
   .navlink{
@@ -119,157 +115,132 @@
   .page.active{display:block;animation:pageIn .5s ease both;}
   @keyframes pageIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
 
-  .stratum{
-    padding:104px 0;
-    border-bottom:1px solid var(--line-soft);
-    position:relative;
-  }
-  .stratum:last-child{border-bottom:0;}
-  .stratum-head{display:flex;align-items:baseline;gap:20px;margin-bottom:34px;}
-
+  /* hero — one line, bottom-weighted */
   .hero{
-    padding:150px 0 138px;
-    border-bottom:1px solid var(--line-soft);
+    min-height:calc(100vh - 91px);
+    display:flex;align-items:flex-end;
+    padding:0 0 clamp(70px,11vh,130px);
   }
-  .hero .display{margin:0 0 38px;max-width:15ch;}
-  .hero .lead{max-width:44ch;color:var(--sage);}
-  .hero-cta{margin-top:52px;display:flex;align-items:center;gap:28px;flex-wrap:wrap;}
-
-  .cta-lg{
-    font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;
-    color:var(--ink);background:var(--gold);border:1px solid var(--gold);cursor:pointer;
-    padding:15px 30px;border-radius:2px;transition:.28s;display:inline-block;text-align:center;
+  .hero .display{
+    font-size:clamp(2.7rem,7.4vw,6.4rem);
+    max-width:19ch;margin:0;
   }
-  .cta-lg:hover{background:var(--gold-soft);border-color:var(--gold-soft);}
-
-  /* home company index — the companies do the talking */
-  .index{list-style:none;margin:0;padding:0;border-top:1px solid var(--line-soft);}
-  .index li{border-bottom:1px solid var(--line-soft);}
-  .index a{
-    display:flex;align-items:baseline;justify-content:space-between;gap:28px;
-    padding:30px 4px;transition:padding .34s ease;
-  }
-  .index a:hover{padding-left:16px;}
-  .index .iname{
-    font-family:var(--serif);font-size:clamp(1.5rem,3.1vw,2.2rem);
-    color:var(--cream);line-height:1.1;transition:color .28s ease;
-  }
-  .index a:hover .iname{color:var(--gold);}
-  .index .isector{
-    font-size:12px;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--sage-dim);text-align:right;flex:none;white-space:nowrap;
-  }
-  .index-more{
-    background:none;border:0;cursor:pointer;padding:0;margin-top:38px;
-    font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:.18em;
-    text-transform:uppercase;color:var(--gold);transition:color .25s;
-  }
-  .index-more:hover{color:var(--gold-soft);}
 
   .page-head{padding:96px 0 20px;}
   .page-head .display{font-size:clamp(2.2rem,5vw,3.6rem);margin-top:26px;max-width:22ch;}
   .page-body{padding:40px 0 104px;}
-
   .rule{height:1px;background:var(--line-soft);margin:0;border:0;}
 
+  /* company index — the list carries the page */
+  .idx-group + .idx-group{margin-top:86px;}
+  .idx-head{margin-bottom:30px;}
+  .idx-note{color:var(--sage);font-size:14px;margin:16px 0 0;}
+  .index{list-style:none;margin:0;padding:0;border-top:1px solid var(--line-soft);}
+  .index li{border-bottom:1px solid var(--line-soft);}
+  .index .row{
+    display:flex;align-items:baseline;justify-content:space-between;gap:40px;
+    padding:32px 4px;transition:padding .34s ease;
+  }
+  .index a.row:hover{padding-left:18px;}
+  .index .iname{
+    font-family:var(--serif);font-size:clamp(1.5rem,3.1vw,2.3rem);
+    color:var(--cream);line-height:1.1;transition:color .28s ease;
+  }
+  .index a.row:hover .iname{color:var(--gold);}
+  .index .imeta{
+    display:flex;align-items:baseline;gap:26px;flex:none;
+    font-size:12px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;
+  }
+  .index .isector{color:var(--sage-dim);}
+  .index .istatus{color:var(--live);}
+
   .lines-3{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:56px;border-top:1px solid var(--line);}
-  /* the explanatory paragraphs above this block were cut, so it now leads the page */
   .page-body > .lines-3:first-child{margin-top:8px;}
-  .line-item{padding:40px 34px 40px 0;border-right:1px solid var(--line-soft);}
+  .line-item{padding:40px 40px 40px 0;border-right:1px solid var(--line-soft);}
   .line-item:last-child{border-right:0;padding-right:0;}
   .line-item .no{font-family:var(--serif);font-style:italic;color:var(--gold-dim);font-size:15px;}
   .line-item h3{margin:14px 0 14px;}
-  .line-item p{color:var(--sage);margin:0;font-size:15px;}
+  .line-item p{color:var(--sage);margin:0;font-size:15px;max-width:44ch;}
 
-  /* portfolio + opportunities cards */
-  .pf-section + .pf-section{margin-top:84px;}
-  .pf-section-head{margin-bottom:8px;}
-  .pf-section-intro{color:var(--sage);max-width:62ch;font-size:15px;margin:18px 0 0;}
-  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:32px;}
-  .ocard{
-    position:relative;border:1px solid var(--line);border-radius:3px;
-    padding:28px 28px 26px;background:linear-gradient(180deg,var(--ink-3),var(--ink-2));
-    display:flex;flex-direction:column;min-height:210px;
-    transition:border-color .3s, transform .3s;
-  }
-  .ocard:hover{border-color:var(--gold-dim);transform:translateY(-2px);}
-  .ocard-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:24px;}
-  .mono{
-    width:52px;height:52px;border-radius:50%;border:1px solid var(--gold);
-    display:flex;align-items:center;justify-content:center;flex:none;
-    font-family:var(--serif);color:var(--gold);font-size:14px;letter-spacing:.03em;
-  }
-  .otag{
-    font-family:'Courier New',ui-monospace,monospace;font-size:10.5px;letter-spacing:.09em;
-    color:var(--gold);border:1px solid var(--line-soft);background:rgba(0,0,0,.20);
-    padding:6px 10px;border-radius:2px;text-align:right;line-height:1.35;max-width:190px;
-  }
-  .oname{font-family:var(--serif);font-size:1.28rem;color:var(--cream);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;}
-  .odesc{color:var(--sage);font-size:14.5px;margin:0 0 auto;line-height:1.5;}
-  .ostatus{color:var(--live);font-size:13px;font-weight:500;margin-top:22px;}
-  .ovisit{color:var(--gold);font-size:13.5px;margin-top:12px;display:inline-block;}
-  .ovisit:hover{color:var(--gold-soft);}
-  .onote{color:var(--sage-dim);font-size:12px;margin-top:12px;font-style:italic;font-family:var(--serif);}
-
-  .gp-grid{display:grid;grid-template-columns:1fr 1fr;gap:46px;margin-top:52px;}
+  .gp-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;margin-top:52px;}
   .gp .gpname{font-family:var(--serif);font-size:1.7rem;color:var(--cream);}
   .gp .gprole{font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin:10px 0 20px;}
-  .gp p{color:var(--sage);font-size:15px;margin:0;}
+  .gp p{color:var(--sage);font-size:15px;margin:0;max-width:58ch;}
 
-  /* footer — now carries contact */
-  footer{border-top:1px solid var(--line-soft);padding:72px 0 40px;}
-  .foot-grid{
-    display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;
-    padding-bottom:44px;border-bottom:1px solid var(--line-soft);
+  /* ============ FOOTER — own colour band ============ */
+  footer{
+    background:var(--foot);
+    border-top:1px solid var(--line-soft);
+    position:relative;z-index:1;
+    padding:88px var(--pad) 34px;
   }
-  .foot-brand .fname{font-family:var(--serif);font-size:1.15rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cream);}
-  .foot-brand .fcity{font-size:13px;color:var(--sage);margin-top:10px;}
-  .foot-brand .fconf{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--sage-dim);margin-top:22px;}
-  .foot-col .flabel{
-    font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
-    color:var(--gold);display:block;margin-bottom:14px;
+  .foot-top{
+    display:flex;align-items:flex-start;justify-content:space-between;
+    gap:60px;flex-wrap:wrap;
   }
-  .foot-col a{
-    font-size:14px;color:var(--sage);border-bottom:1px solid var(--line-soft);
-    padding-bottom:2px;transition:color .25s, border-color .25s;
+  .foot-cta{display:flex;align-items:center;gap:30px;flex-wrap:wrap;}
+  .foot-h{font-family:var(--serif);font-size:clamp(2rem,4.4vw,3.3rem);color:var(--cream);}
+  .foot-btn{
+    font-family:var(--sans);font-size:11.5px;font-weight:500;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--ink);background:var(--gold);
+    border:1px solid var(--gold);padding:15px 30px;border-radius:2px;
+    transition:.28s;display:inline-block;white-space:nowrap;
   }
-  .foot-col a:hover{color:var(--gold-soft);border-color:var(--gold-dim);}
-  .foot-base{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;padding-top:26px;}
+  .foot-btn:hover{background:var(--gold-soft);border-color:var(--gold-soft);}
+
+  .foot-right{display:flex;flex-direction:column;align-items:flex-end;gap:16px;text-align:right;}
+  .foot-id{display:flex;align-items:center;gap:14px;}
+  .foot-id img{width:44px;height:44px;flex:none;}
+  .foot-id .fcity{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--sage);}
+  .foot-links{display:flex;gap:26px;flex-wrap:wrap;justify-content:flex-end;}
+  .foot-links a,.foot-links button{
+    background:none;border:0;padding:0;cursor:pointer;
+    font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--sage);transition:color .25s;
+  }
+  .foot-links a:hover,.foot-links button:hover{color:var(--gold);}
+
+  .foot-base{
+    display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;
+    margin-top:56px;padding-top:24px;border-top:1px solid rgba(199,169,97,0.10);
+  }
   .foot-base .fcopy{font-size:12px;color:var(--sage-dim);}
   .foot-base a.fcopy:hover{color:var(--gold-dim);}
-  .legal{max-width:var(--maxw);margin:0 auto;padding:0 40px 44px;font-size:11px;color:var(--sage-dim);line-height:1.7;}
+  .legal{font-size:11px;color:#3f483c;line-height:1.7;margin-top:22px;}
 
   .reveal{transition:opacity .8s ease, transform .8s ease;}
   html.js .reveal{opacity:0;transform:translateY(18px);}
   html.js .reveal.in{opacity:1;transform:none;}
 
-  @media(max-width:980px){
-    .grid3{grid-template-columns:1fr 1fr;}
-    .foot-grid{grid-template-columns:1fr 1fr;gap:34px;}
+  @media(max-width:1100px){
+    :root{--pad:34px;}
   }
   @media(max-width:860px){
-    .wrap{padding:0 24px;}
-    .nav-inner{padding:14px 24px;}
-    nav.links{position:fixed;inset:64px 0 auto 0;flex-direction:column;align-items:stretch;
-      background:var(--ink-2);border-bottom:1px solid var(--line);padding:14px 24px 22px;gap:2px;
-      transform:translateY(-140%);transition:transform .35s ease;}
-    nav.links.open{transform:none;}
+    :root{--pad:22px;}
+    .nav-inner{padding:14px var(--pad);}
+    .mark{width:44px;height:44px;}
+    .brand .name{font-size:15px;letter-spacing:.12em;}
+    nav.links{position:fixed;inset:78px 0 auto 0;flex-direction:column;align-items:stretch;
+      background:var(--ink-2);border-bottom:1px solid var(--line);padding:14px 22px 22px;gap:2px;
+      transform:translateY(-160%);transition:transform .35s ease;visibility:hidden;}
+    nav.links.open{transform:none;visibility:visible;}
     .navlink{text-align:left;padding:14px 6px;font-size:13px;}
     .btn-access{margin:12px 0 0;width:100%;padding:15px;display:block;}
     .menu-toggle{display:block;}
     .lines-3,.gp-grid{grid-template-columns:1fr;}
     .line-item{border-right:0;border-bottom:1px solid var(--line-soft);padding:32px 0;}
     .line-item:last-child{border-bottom:0;}
-    .hero{padding:96px 0 84px;}
-    .stratum{padding:76px 0;}
-    .index a{flex-direction:column;gap:8px;padding:24px 4px;}
-    .index .isector{text-align:left;max-width:none;}
-    .brand .name{font-size:14px;letter-spacing:.1em;}
-    .brand .tag{display:none;}
+    .hero{min-height:78vh;padding-bottom:64px;}
+    .index .row{flex-direction:column;gap:10px;padding:24px 4px;}
+    .index .imeta{gap:16px;white-space:normal;}
+    .foot-top{flex-direction:column;gap:44px;}
+    .foot-right{align-items:flex-start;text-align:left;}
+    .foot-links{justify-content:flex-start;}
+    footer{padding-top:64px;}
   }
-  @media(max-width:640px){
-    .grid3{grid-template-columns:1fr;}
-    .foot-grid{grid-template-columns:1fr;gap:30px;}
+  @media(max-width:520px){
+    .foot-cta{gap:20px;}
+    .foot-btn{width:100%;text-align:center;}
   }
 
   @media(prefers-reduced-motion:reduce){
@@ -290,11 +261,8 @@
 <header class="nav">
   <div class="nav-inner">
     <button class="brand" data-tab="home" aria-label="Aurelian Ventures, home">
-      <img class="mark" src="/logo.png" alt="Aurelian" width="34" height="34" />
-      <span class="wordmark">
-        <span class="name">Aurelian Ventures</span>
-        <span class="tag">Capital · Intelligence · Legacy</span>
-      </span>
+      <img class="mark" src="/logo.png" alt="Aurelian" width="54" height="54" />
+      <span class="name">Aurelian Ventures</span>
     </button>
 
     <div style="display:flex;align-items:center;">
@@ -315,53 +283,9 @@
 
 <!-- ============ HOME ============ -->
 <section class="page active" id="home">
-
   <div class="hero">
     <div class="wrap reveal">
-      <h1 class="display">First institutional capital, at the founding round</h1>
-      <p class="lead">Compute, settlement, and intelligence. The layers the next decade runs on, built by teams still unknown to the market.</p>
-      <div class="hero-cta">
-        <a class="cta-lg" href="mailto:contact@aurelianlabs.ai?subject=Aurelian%20Ventures%20Fund%20I%20Enquiry">Request access</a>
-      </div>
-    </div>
-  </div>
-
-  <div class="stratum">
-    <div class="wrap reveal">
-      <div class="stratum-head"><span class="eyebrow">Portfolio</span></div>
-      <ul class="index">
-        <li>
-          <a href="https://homebuyerhelp.ai" target="_blank" rel="noopener">
-            <span class="iname">Homebuyer Help</span>
-            <span class="isector">Consumer finance</span>
-          </a>
-        </li>
-        <li>
-          <a href="https://aurelianlink.com" target="_blank" rel="noopener">
-            <span class="iname">Aurelian Link</span>
-            <span class="isector">Market infrastructure</span>
-          </a>
-        </li>
-        <li>
-          <a href="https://lingcode.dev" target="_blank" rel="noopener">
-            <span class="iname">LingCode</span>
-            <span class="isector">Developer infrastructure</span>
-          </a>
-        </li>
-        <li>
-          <a href="https://qubit.trade/perpetual" target="_blank" rel="noopener">
-            <span class="iname">Qubit Labs</span>
-            <span class="isector">Blockchain infrastructure</span>
-          </a>
-        </li>
-        <li>
-          <a href="https://www.capcure.co" target="_blank" rel="noopener">
-            <span class="iname">CapCure</span>
-            <span class="isector">Capital intelligence</span>
-          </a>
-        </li>
-      </ul>
-      <button class="index-more" data-tab="portfolio">Current opportunities →</button>
+      <h1 class="display">The foundations of the next era are being rebuilt</h1>
     </div>
   </div>
 </section>
@@ -406,87 +330,103 @@
     <hr class="rule">
     <div class="page-body">
 
-      <!-- Current Opportunities -->
-      <div class="pf-section reveal">
-        <div class="pf-section-head">
+      <div class="idx-group reveal">
+        <div class="idx-head">
           <span class="eyebrow">Current Opportunities</span>
-          <p class="pf-section-intro">Founding-round positions in the current fund pipeline. Companies are named in diligence.</p>
+          <p class="idx-note">Founding-round positions in the current fund pipeline. Companies are named in diligence.</p>
         </div>
-        <div class="grid3">
-          <div class="ocard">
-            <div class="ocard-top"><span class="mono">I</span><span class="otag">Compute &amp; Data Infrastructure</span></div>
-            <div class="oname">Data-Center Efficiency Layer</div>
-            <p class="odesc">Collapses the storage and compute an operator needs to serve the same workload. Anchored by a multi-year agreement with a U.S. operator.</p>
-            <div class="ostatus">Commercial Traction</div>
-            <div class="onote">Named in diligence</div>
-          </div>
-          <div class="ocard">
-            <div class="ocard-top"><span class="mono">II</span><span class="otag">AI Runtime Infrastructure</span></div>
-            <div class="oname">Model Runtime</div>
-            <p class="odesc">Extends what today's models can hold, and how reliably they behave, on standard hardware.</p>
-            <div class="ostatus">Research Stage</div>
-            <div class="onote">Named in diligence</div>
-          </div>
-          <div class="ocard">
-            <div class="ocard-top"><span class="mono">III</span><span class="otag">Settlement &amp; Coordination Infrastructure</span></div>
-            <div class="oname">Execution-Proof Protocol</div>
-            <p class="odesc">Lets institutions prove what was authorized, executed, and settled, without trusting any single party.</p>
-            <div class="ostatus">Consensus Validated</div>
-            <div class="onote">Named in diligence</div>
-          </div>
-          <div class="ocard">
-            <div class="ocard-top"><span class="mono">IV</span><span class="otag">Institutional Settlement Infrastructure</span></div>
-            <div class="oname">On-Chain Settlement Orchestration</div>
-            <p class="odesc">Shared-state settlement for the institutional repo and collateral market, with an immutable audit trail.</p>
-            <div class="ostatus">In Development</div>
-            <div class="onote">Named in diligence</div>
-          </div>
-        </div>
+        <ul class="index">
+          <li>
+            <div class="row">
+              <span class="iname">Data-Center Efficiency Layer</span>
+              <span class="imeta">
+                <span class="isector">Compute &amp; data</span>
+                <span class="istatus">Commercial traction</span>
+              </span>
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="iname">Model Runtime</span>
+              <span class="imeta">
+                <span class="isector">AI runtime</span>
+                <span class="istatus">Research stage</span>
+              </span>
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="iname">Execution-Proof Protocol</span>
+              <span class="imeta">
+                <span class="isector">Settlement &amp; coordination</span>
+                <span class="istatus">Consensus validated</span>
+              </span>
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="iname">On-Chain Settlement Orchestration</span>
+              <span class="imeta">
+                <span class="isector">Institutional settlement</span>
+                <span class="istatus">In development</span>
+              </span>
+            </div>
+          </li>
+        </ul>
       </div>
 
-      <!-- Current Portfolio -->
-      <div class="pf-section reveal">
-        <div class="pf-section-head">
+      <div class="idx-group reveal">
+        <div class="idx-head">
           <span class="eyebrow">Current Portfolio</span>
-          <p class="pf-section-intro">Companies built and backed through the incubator.</p>
+          <p class="idx-note">Companies built and backed through the incubator.</p>
         </div>
-        <div class="grid3">
-          <div class="ocard">
-            <div class="ocard-top"><span class="mono">HBH</span><span class="otag">Consumer Financial Infrastructure</span></div>
-            <div class="oname">Homebuyer Help</div>
-            <p class="odesc">Optimizes financing pathways for first-time homebuyers.</p>
-            <div class="ostatus">Live Beta</div>
-            <a class="ovisit" href="https://homebuyerhelp.ai" target="_blank" rel="noopener">Visit Site →</a>
-          </div>
-          <div class="ocard">
-            <div class="ocard-top"><span class="mono">AL</span><span class="otag">Financial Market Infrastructure</span></div>
-            <div class="oname">Aurelian Link</div>
-            <p class="odesc">Institutional repo and secured funding rails.</p>
-            <div class="ostatus">Prototype Development</div>
-            <a class="ovisit" href="https://aurelianlink.com" target="_blank" rel="noopener">Visit Site →</a>
-          </div>
-          <div class="ocard">
-            <div class="ocard-top"><span class="mono">LC</span><span class="otag">AI Developer Infrastructure</span></div>
-            <div class="oname">LingCode</div>
-            <p class="odesc">AI-native environment for shipping production software.</p>
-            <div class="ostatus">Active Development</div>
-            <a class="ovisit" href="https://lingcode.dev" target="_blank" rel="noopener">Visit Site →</a>
-          </div>
-          <div class="ocard">
-            <div class="ocard-top"><span class="mono">QB</span><span class="otag">Agentic Blockchain Infrastructure</span></div>
-            <div class="oname">Qubit Labs</div>
-            <p class="odesc">AI-native L1 for high-performance agentic trading.</p>
-            <div class="ostatus">Active Deployment</div>
-            <a class="ovisit" href="https://qubit.trade/perpetual" target="_blank" rel="noopener">Visit Site →</a>
-          </div>
-          <div class="ocard">
-            <div class="ocard-top"><span class="mono">CC</span><span class="otag">Capital Intelligence Infrastructure</span></div>
-            <div class="oname">CapCure</div>
-            <p class="odesc">Aligns companies with strategically relevant capital.</p>
-            <div class="ostatus">Prototype Development</div>
-            <a class="ovisit" href="https://www.capcure.co" target="_blank" rel="noopener">Visit Site →</a>
-          </div>
-        </div>
+        <ul class="index">
+          <li>
+            <a class="row" href="https://homebuyerhelp.ai" target="_blank" rel="noopener">
+              <span class="iname">Homebuyer Help</span>
+              <span class="imeta">
+                <span class="isector">Consumer finance</span>
+                <span class="istatus">Live beta</span>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a class="row" href="https://aurelianlink.com" target="_blank" rel="noopener">
+              <span class="iname">Aurelian Link</span>
+              <span class="imeta">
+                <span class="isector">Market infrastructure</span>
+                <span class="istatus">Prototype</span>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a class="row" href="https://lingcode.dev" target="_blank" rel="noopener">
+              <span class="iname">LingCode</span>
+              <span class="imeta">
+                <span class="isector">Developer infrastructure</span>
+                <span class="istatus">Active development</span>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a class="row" href="https://qubit.trade/perpetual" target="_blank" rel="noopener">
+              <span class="iname">Qubit Labs</span>
+              <span class="imeta">
+                <span class="isector">Blockchain infrastructure</span>
+                <span class="istatus">Active deployment</span>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a class="row" href="https://www.capcure.co" target="_blank" rel="noopener">
+              <span class="iname">CapCure</span>
+              <span class="imeta">
+                <span class="isector">Capital intelligence</span>
+                <span class="istatus">Prototype</span>
+              </span>
+            </a>
+          </li>
+        </ul>
       </div>
 
     </div>
@@ -520,37 +460,37 @@
 
 </main>
 
-<!-- ============ FOOTER (now carries contact) ============ -->
+<!-- ============ FOOTER ============ -->
 <footer>
-  <div class="wrap">
-    <div class="foot-grid">
-      <div class="foot-brand">
-        <div class="fname">Aurelian Ventures</div>
-        <div class="fcity">New York</div>
-        <div class="fconf">Capital · Intelligence · Legacy</div>
-      </div>
-      <div class="foot-col">
-        <span class="flabel">Families &amp; institutions</span>
-        <a href="mailto:contact@aurelianlabs.ai?subject=Aurelian%20Ventures%20Fund%20I%20Enquiry">contact@aurelianlabs.ai</a>
-      </div>
-      <div class="foot-col">
-        <span class="flabel">Founders</span>
-        <a href="mailto:contact@aurelianlabs.ai?subject=Founder%20Enquiry">contact@aurelianlabs.ai</a>
-      </div>
-      <div class="foot-col">
-        <span class="flabel">Press &amp; partnerships</span>
-        <a href="mailto:contact@aurelianlabs.ai?subject=Aurelian%20Ventures%20Partnerships">contact@aurelianlabs.ai</a>
-      </div>
+  <div class="foot-top">
+    <div class="foot-cta">
+      <h2 class="foot-h">Get in touch</h2>
+      <a class="foot-btn" href="mailto:contact@aurelianlabs.ai?subject=Aurelian%20Ventures%20Fund%20I%20Enquiry">Contact us</a>
     </div>
-    <div class="foot-base">
-      <span class="fcopy">© 2026 Aurelian Ventures</span>
-      <a class="fcopy" href="https://aurelianlabs.ai">Aurelian Labs ↗</a>
+
+    <div class="foot-right">
+      <div class="foot-id">
+        <img src="/logo.png" alt="" width="44" height="44" />
+        <span class="fcity">New York</span>
+      </div>
+      <div class="foot-links">
+        <button data-tab="portfolio">Portfolio</button>
+        <button data-tab="studio">Incubator</button>
+        <button data-tab="team">Team</button>
+        <a href="https://aurelianlabs.ai">Aurelian Labs ↗</a>
+      </div>
     </div>
   </div>
+
+  <div class="foot-base">
+    <span class="fcopy">© 2026 Aurelian Ventures</span>
+    <a class="fcopy" href="mailto:contact@aurelianlabs.ai">contact@aurelianlabs.ai</a>
+  </div>
+
+  <div class="legal">
+    Aurelian Ventures is an operating incubator. This site is for general information about the incubator and does not constitute an offer to sell, or a solicitation of an offer to buy, any security. Any offering of interests in Aurelian Ventures Fund I is made solely to qualified investors through the fund's definitive offering documents. Forward-looking statements are not guarantees, and past activity is not indicative of future results.
+  </div>
 </footer>
-<div class="legal">
-  Aurelian Ventures is an operating incubator. This site is for general information about the incubator and does not constitute an offer to sell, or a solicitation of an offer to buy, any security. Any offering of interests in Aurelian Ventures Fund I is made solely to qualified investors through the fund's definitive offering documents. Forward-looking statements are not guarantees, and past activity is not indicative of future results.
-</div>
 
 <script>
 (function(){
