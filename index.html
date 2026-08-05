@@ -344,7 +344,17 @@
     .line-item:first-child{padding-left:0;}
     .line-item:last-child{border-bottom:0;}
 
-    .hero{min-height:78vh;padding-bottom:64px;}
+    /* desktop keeps the line bottom-weighted; on a phone that pushed it to the
+       bottom of the screen, so it reads from the top instead. The hero still
+       fills the screen so the footer stays below the fold rather than creeping
+       onto the first view. svh accounts for the mobile browser chrome; the vh
+       line above it is the fallback. 73px is the mobile nav. */
+    .hero{
+      align-items:flex-start;
+      min-height:calc(100vh - 73px);
+      min-height:calc(100svh - 73px);
+      padding:40px 0 72px;
+    }
     .page-head{padding:72px 0 32px;}
     .page-body.no-head{padding-top:48px;}
     .idx-group{padding-top:56px;}
