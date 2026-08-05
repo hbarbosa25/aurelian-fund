@@ -24,6 +24,7 @@
     --line:rgba(199,169,97,0.22);
     --line-soft:rgba(199,169,97,0.12);
     --pad:44px;
+    --ease-out:cubic-bezier(0.23,1,0.32,1);
     /* type scale — 8 steps, nothing off-scale */
     --t-xs:11px;       /* legal only */
     --t-sm:12px;       /* every uppercase micro-label */
@@ -189,12 +190,73 @@
   .line-item p{color:var(--sage);margin:0;font-size:var(--t-base);max-width:42ch;}
 
   .gp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:44px;margin-top:16px;}
+  .gp-card{
+    position:relative;overflow:hidden;border-radius:2px;
+    border:1px solid var(--line-soft);margin-bottom:26px;background:var(--ink-2);
+  }
   /* headshots come from different shoots; a touch of desaturation unifies them */
   .gp-photo{
     /* height:auto is required — the width/height attrs (kept for CLS) otherwise beat aspect-ratio */
     width:100%;height:auto;aspect-ratio:1;object-fit:cover;display:block;
-    border:1px solid var(--line-soft);border-radius:2px;
-    filter:saturate(.82);margin-bottom:26px;background:var(--ink-2);
+    filter:saturate(.82);
+    transition:transform 420ms var(--ease-out);
+  }
+  .gp-veil{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;justify-content:flex-end;gap:20px;
+    padding:26px 24px;
+    background:linear-gradient(180deg,rgba(10,20,14,.42) 0%,rgba(10,20,14,.72) 100%);
+    -webkit-backdrop-filter:blur(13px) saturate(.86);
+    backdrop-filter:blur(13px) saturate(.86);
+    opacity:0;pointer-events:none;
+    /* exit is quicker than enter */
+    transition:opacity 170ms var(--ease-out);
+  }
+  .gp-meta{display:flex;flex-direction:column;gap:16px;}
+  .gp-field{
+    opacity:0;transform:translateY(7px);
+    transition:opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
+  }
+  .gp-k{
+    display:block;font-size:var(--t-sm);font-weight:500;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--gold);margin-bottom:5px;
+  }
+  .gp-v{display:block;font-size:var(--t-base);color:var(--cream);line-height:1.45;}
+  .gp-go{
+    width:46px;height:46px;border-radius:50%;flex:none;
+    background:var(--gold);color:var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;transform:translateY(7px);
+    transition:opacity 200ms var(--ease-out), transform 160ms var(--ease-out),
+               background 160ms ease;
+  }
+  .gp-go:hover{background:var(--gold-soft);}
+  .gp-go:active{transform:scale(.97);}
+
+  /* only wire the reveal where hover genuinely exists */
+  @media (hover:hover) and (pointer:fine){
+    .gp-card:hover .gp-veil,
+    .gp-card:focus-within .gp-veil{opacity:1;pointer-events:auto;transition-duration:260ms;}
+    .gp-card:hover .gp-photo,
+    .gp-card:focus-within .gp-photo{transform:scale(1.03);}
+    .gp-card:hover .gp-field,   .gp-card:focus-within .gp-field,
+    .gp-card:hover .gp-go,      .gp-card:focus-within .gp-go{opacity:1;transform:none;}
+    .gp-card:hover .gp-field:nth-child(1){transition-delay:55ms;}
+    .gp-card:hover .gp-field:nth-child(2){transition-delay:95ms;}
+    .gp-card:hover .gp-field:nth-child(3){transition-delay:135ms;}
+    .gp-card:hover .gp-go{transition-delay:170ms;}
+  }
+  /* touch and keyboard-only devices never fire hover, so the data sits inline instead */
+  /* also below 860px: cards are ~151px there, too small to hold the panel even
+     on a desktop window that technically supports hover */
+  @media (hover:none),(pointer:coarse),(max-width:860px){
+    .gp-veil{
+      position:static;opacity:1;pointer-events:auto;
+      background:none;-webkit-backdrop-filter:none;backdrop-filter:none;
+      padding:20px 0 0;gap:16px;
+    }
+    .gp-field,.gp-go{opacity:1;transform:none;}
+    .gp-meta{gap:14px;}
   }
   .gp .gpname{font-family:var(--serif);font-size:var(--t-h3);color:var(--cream);line-height:1.2;}
   .gp .gprole{font-size:var(--t-sm);letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin:10px 0 18px;}
@@ -284,6 +346,7 @@
   @media(prefers-reduced-motion:reduce){
     *{animation:none!important;transition:none!important;scroll-behavior:auto!important;}
     .reveal{opacity:1!important;transform:none!important;}
+    .gp-field,.gp-go,.gp-photo{transform:none!important;}
   }
   :focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
 </style>
@@ -492,25 +555,65 @@
       <div class="idx-group reveal">
         <div class="gp-grid">
           <div class="gp">
-            <img class="gp-photo" src="/team/nathaniel-norman.jpg" alt="Nathaniel Norman" width="600" height="600" loading="lazy">
+            <div class="gp-card">
+              <img class="gp-photo" src="/team/nathaniel-norman.jpg" alt="Nathaniel Norman" width="600" height="600" loading="lazy">
+              <div class="gp-veil">
+                <div class="gp-meta">
+                  <div class="gp-field"><span class="gp-k">Based in</span><span class="gp-v">New York</span></div>
+                  <div class="gp-field"><span class="gp-k">Speciality</span><span class="gp-v">Founding round</span></div>
+                  <div class="gp-field"><span class="gp-k">Focus</span><span class="gp-v">Fintech<br>Settlement<br>Capital markets</span></div>
+                </div>
+                <a class="gp-go" href="https://www.linkedin.com/in/nathaniel-norman-x/" target="_blank" rel="noopener" aria-label="Nathaniel Norman on LinkedIn"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
+              </div>
+            </div>
             <div class="gpname">Nathaniel Norman</div>
             <div class="gprole">Co-founder &amp; GP · Fintech</div>
             <p>Founded and led companies across fintech and deeptech AI infrastructure. Brings the capital-markets depth to judge which bets are real before the market does.</p>
           </div>
           <div class="gp">
-            <img class="gp-photo" src="/team/ishita-wadhwa.jpg" alt="Ishita Wadhwa" width="600" height="600" loading="lazy">
+            <div class="gp-card">
+              <img class="gp-photo" src="/team/ishita-wadhwa.jpg" alt="Ishita Wadhwa" width="600" height="600" loading="lazy">
+              <div class="gp-veil">
+                <div class="gp-meta">
+                  <div class="gp-field"><span class="gp-k">Based in</span><span class="gp-v">New York</span></div>
+                  <div class="gp-field"><span class="gp-k">Speciality</span><span class="gp-v">Founding round</span></div>
+                  <div class="gp-field"><span class="gp-k">Focus</span><span class="gp-v">Deeptech<br>Compute<br>Intelligence</span></div>
+                </div>
+                <a class="gp-go" href="https://www.linkedin.com/in/ishitawadhwa/" target="_blank" rel="noopener" aria-label="Ishita Wadhwa on LinkedIn"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
+              </div>
+            </div>
             <div class="gpname">Ishita Wadhwa</div>
             <div class="gprole">Co-founder &amp; GP · Deeptech</div>
             <p>Built at the intersection of emerging technology and company creation. Brings the network that surfaces founders before institutional capital sees them.</p>
           </div>
           <div class="gp">
-            <img class="gp-photo" src="/team/ryan-levychin.jpg" alt="Ryan Levychin" width="600" height="600" loading="lazy">
+            <div class="gp-card">
+              <img class="gp-photo" src="/team/ryan-levychin.jpg" alt="Ryan Levychin" width="600" height="600" loading="lazy">
+              <div class="gp-veil">
+                <div class="gp-meta">
+                  <div class="gp-field"><span class="gp-k">Based in</span><span class="gp-v">New York</span></div>
+                  <div class="gp-field"><span class="gp-k">Speciality</span><span class="gp-v">Platform</span></div>
+                  <div class="gp-field"><span class="gp-k">Focus</span><span class="gp-v">Network<br>Events<br>Partnerships</span></div>
+                </div>
+                <a class="gp-go" href="https://www.linkedin.com/in/ryan-levychin-6224a7255/" target="_blank" rel="noopener" aria-label="Ryan Levychin on LinkedIn"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
+              </div>
+            </div>
             <div class="gpname">Ryan Levychin</div>
             <div class="gprole">Head of Platform</div>
             <p>Runs outreach and events, building the network the firm sources and raises from.</p>
           </div>
           <div class="gp">
-            <img class="gp-photo" src="/team/shounak-malhotra.jpg" alt="Shounak Malhotra" width="600" height="600" loading="lazy">
+            <div class="gp-card">
+              <img class="gp-photo" src="/team/shounak-malhotra.jpg" alt="Shounak Malhotra" width="600" height="600" loading="lazy">
+              <div class="gp-veil">
+                <div class="gp-meta">
+                  <div class="gp-field"><span class="gp-k">Based in</span><span class="gp-v">New York</span></div>
+                  <div class="gp-field"><span class="gp-k">Speciality</span><span class="gp-v">Diligence</span></div>
+                  <div class="gp-field"><span class="gp-k">Focus</span><span class="gp-v">Sourcing<br>Research</span></div>
+                </div>
+                <a class="gp-go" href="https://www.linkedin.com/in/shounak-malhotra/" target="_blank" rel="noopener" aria-label="Shounak Malhotra on LinkedIn"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M12 5l7 7-7 7"/></svg></a>
+              </div>
+            </div>
             <div class="gpname">Shounak Malhotra</div>
             <div class="gprole">Venture Associate</div>
             <p>Deal sourcing, diligence, and market research across the venture portfolio.</p>
