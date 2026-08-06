@@ -35,6 +35,16 @@
     --t-h2:clamp(1.75rem,2.9vw,2.15rem);
     --t-h1:clamp(2.1rem,4.2vw,3.2rem);
     --t-display:clamp(2.5rem,5.8vw,4.75rem);
+    /* Ninth step, form controls ONLY. iOS Safari zooms the viewport on focus for
+       any control under 16px; at --t-base (15px) that fires on all twenty fields
+       and reflows the page each time. Do not reach for --t-lg (19px) — that is
+       the wordmark, and twenty fields at wordmark scale reads as a large-print
+       form. Nothing but .fctl may use this. */
+    --t-form:16px;
+    /* The nav height the hero subtracts. It used to be hardcoded twice, so the
+       moment a fourth nav item made the bar wrap the hero overshot the viewport
+       on a page nobody was editing. */
+    --nav-h:91px;
     --serif:'Playfair Display', Georgia, serif;
     --sans:'Instrument Sans', system-ui, -apple-system, sans-serif;
   }
@@ -133,7 +143,8 @@
   @keyframes pageIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
 
   .hero{
-    min-height:calc(100vh - 91px);
+    min-height:calc(100vh - var(--nav-h));
+    min-height:calc(100svh - var(--nav-h));
     display:flex;align-items:flex-end;
     padding:0 0 clamp(70px,11vh,130px);
   }
@@ -321,13 +332,177 @@
   html.js .reveal{opacity:0;transform:translateY(18px);}
   html.js .reveal.in{opacity:1;transform:none;}
 
+
+  /* ---- application form ----------------------------------------------------
+     Lines for facts, panels for prose. Twenty stacked filled rectangles is what
+     makes a page read as a form instead of a document, so single-line answers
+     get no fill and no box, only a hairline under them. Only the long-form
+     answers and the three selects get a surface.
+
+     The column is capped and the RULES ARE CAPPED WITH IT. An earlier cut ran
+     the hairlines full-bleed like .index does while the content sat at 64ch,
+     which measured 598px of empty rule at 1440 and 1,718px at 2560 — two thirds
+     of every row pointing at nothing on the monitors the GPs actually use.
+  -------------------------------------------------------------------------- */
+  .apply{max-width:72ch;}
+  .fgroup{padding-top:54px;}
+  .fgroup:first-of-type{padding-top:14px;}
+  .flabel{
+    font-size:var(--t-sm);font-weight:500;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--gold);margin-bottom:16px;
+  }
+  .fields{list-style:none;margin:0;padding:0;border-top:1px solid var(--line-soft);}
+  .field{
+    border-bottom:1px solid var(--line-soft);padding:24px 0;
+    display:grid;grid-template-columns:26px 1fr;column-gap:28px;
+  }
+  /* 26px matches .inum exactly. Numerals run continuously I-XX at --t-sm rather
+     than --t-base, because "XVIII" in Playfair italic at 15px is ~31px and would
+     break the gutter. --t-sm is an existing scale step; no new size is invented. */
+  .fnum{
+    font-family:var(--serif);font-style:italic;font-size:var(--t-sm);
+    color:var(--gold-dim);font-variant-numeric:tabular-nums;padding-top:4px;
+  }
+  .fbody{min-width:0;}
+  .fhead{display:flex;align-items:baseline;justify-content:space-between;gap:24px;}
+  .fq{font-size:var(--t-base);color:var(--cream);transition:color .25s;}
+  .field:focus-within .fq{color:var(--gold);}
+  /* Only OPTIONAL and RECOMMENDED are marked. Required is the default state and
+     carries no information; printing it on fourteen of twenty rows would just be
+     the same gold word repeated down a five-thousand-pixel page. */
+  .fmeta{
+    font-size:var(--t-sm);letter-spacing:.14em;text-transform:uppercase;
+    color:var(--sage-dim);white-space:nowrap;flex:none;font-variant-numeric:tabular-nums;
+  }
+  .fcount[data-near="true"]{color:var(--gold);}
+  .fhelp{color:var(--sage);font-size:var(--t-sm);margin:9px 0 0;}
+
+  .fctl{
+    display:block;width:100%;margin-top:14px;
+    font-family:var(--sans);font-size:var(--t-form);font-weight:300;
+    color:var(--cream);background:none;border:0;border-radius:0;
+    border-bottom:1px solid var(--line-soft);padding:9px 2px;
+    transition:border-color .25s;
+  }
+  .fctl:hover{border-bottom-color:var(--line);}
+  /* Focus is the gold line. Nothing else — no surface colour appears here that
+     the rest of the site has never shown. */
+  .fctl:focus{outline:none;border-bottom-color:var(--gold);}
+  .fctl::placeholder{color:var(--sage-dim);}
+
+  textarea.fctl,select.fctl{
+    background:var(--ink-2);border:1px solid var(--line-soft);border-radius:2px;
+    padding:13px 14px;
+  }
+  textarea.fctl{resize:vertical;min-height:116px;line-height:1.62;}
+  textarea.fctl:focus,select.fctl:focus{border-color:var(--gold);}
+  select.fctl{
+    appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:38px;
+    background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%23c7a961' stroke-width='1.4'%3E%3Cpath d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center;
+  }
+  /* Without this the unchosen "Select" renders at full cream, so three empty
+     dropdowns look like three answers the founder already gave. */
+  select.fctl:has(option[value=""]:checked){color:var(--sage-dim);}
+  select.fctl option{background:var(--ink-2);color:var(--cream);}
+
+  /* Q17. Ruled cells, the .lines-3 device applied to ten options — the site
+     never uses gapped grids for enumerated items, it uses ruled cells. */
+  .fchecks{
+    display:grid;grid-template-columns:1fr 1fr;margin-top:16px;
+    border-top:1px solid var(--line-soft);
+  }
+  .fchecks label{
+    display:flex;align-items:center;gap:13px;cursor:pointer;
+    padding:13px 18px;border-bottom:1px solid var(--line-soft);
+    font-size:var(--t-base);color:var(--cream);
+  }
+  .fchecks label:nth-child(odd){border-right:1px solid var(--line-soft);padding-left:0;}
+  .fchecks label:nth-child(even){padding-right:0;}
+  /* Custom box rather than accent-color: on a strictly two-hue page a system
+     blue tick would be a third colour. */
+  .fchecks input{
+    appearance:none;-webkit-appearance:none;margin:0;
+    width:15px;height:15px;flex:none;position:relative;cursor:pointer;
+    border:1px solid var(--line);border-radius:2px;background:none;
+    transition:background .2s,border-color .2s;
+  }
+  .fchecks input:checked{background:var(--gold);border-color:var(--gold);}
+  .fchecks input:checked::after{
+    content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;
+    border:solid var(--ink);border-width:0 1.5px 1.5px 0;transform:rotate(42deg);
+  }
+  /* Windows High Contrast turns an appearance:none box into an invisible square. */
+  @media(forced-colors:active){.fchecks input{appearance:auto;}}
+
+  /* Errors use [hidden], never :empty — this file is hand-edited and scp'd, and
+     one reformat would turn twenty invisible paragraphs into twenty phantom gaps. */
+  .ferr{color:var(--gold-soft);font-size:var(--t-sm);margin:10px 0 0;}
+  .field[data-invalid] .fctl{border-color:var(--gold-soft);}
+  .fsummary{border-left:1px solid var(--gold);padding:2px 0 2px 18px;margin:38px 0 0;}
+  .fsummary h3{font-family:var(--sans);font-size:var(--t-base);font-weight:500;color:var(--cream);margin:0 0 10px;}
+  .fsummary ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px;}
+  .fsummary a{color:var(--gold);font-size:var(--t-sm);border-bottom:1px solid var(--line);}
+
+  /* Not .legal — that is 11px at 2.08:1 contrast, which is right for footer
+     boilerplate meant to be present rather than read, and wrong for a
+     confidentiality term. --t-sm on --sage computes to 5.97:1. */
+  .fnotice{margin:46px 0 0;}
+  .fnotice p{color:var(--sage);font-size:var(--t-sm);line-height:1.7;margin:0 0 11px;}
+  .fnotice .fnk{
+    display:block;font-size:var(--t-sm);font-weight:500;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--gold);margin-bottom:12px;
+  }
+  .fnotice a{color:var(--gold);border-bottom:1px solid var(--line);}
+  .fsubmit{
+    font-family:var(--sans);font-size:var(--t-sm);font-weight:500;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--ink);background:var(--gold);
+    border:1px solid var(--gold);padding:12px 26px;border-radius:2px;
+    /* <button> does not inherit body line-height the way <a> does, so without
+       this the submit is 40.5px against the footer button's 43.4px. */
+    line-height:19.44px;
+    cursor:pointer;transition:.28s;margin-top:20px;
+  }
+  .fsubmit:hover:not(:disabled){background:var(--gold-soft);border-color:var(--gold-soft);}
+  .fsubmit:disabled{opacity:.5;cursor:default;}
+  .fnote-inline{color:var(--sage-dim);font-size:var(--t-sm);margin:14px 0 0;}
+  .fdone{max-width:64ch;padding-top:8px;}
+  .fdone h2{font-size:var(--t-h2);color:var(--cream);margin:0 0 18px;}
+  .fdone p{color:var(--sage);font-size:var(--t-base);max-width:56ch;}
+  .fdone:focus{outline:none;}
+
+  /* Legal page: plain prose, same measure as .idx-note. */
+  .prose{max-width:68ch;}
+  .prose h2{font-size:var(--t-h3);color:var(--cream);margin:44px 0 14px;}
+  .prose h2:first-child{margin-top:0;}
+  .prose p,.prose li{color:var(--sage);font-size:var(--t-base);}
+  .prose ul{padding-left:20px;margin:0 0 1.1em;}
+  .prose li{margin-bottom:6px;}
+  .prose a{color:var(--gold);border-bottom:1px solid var(--line);}
+
+  @media(max-width:640px){
+    .field{grid-template-columns:1fr;}
+    /* one numeral size or none; two would make the register visibly not itself */
+    .fnum{display:none;}
+    .fhead{flex-direction:column;align-items:flex-start;gap:5px;}
+    .fmeta{white-space:normal;}
+    .fchecks{grid-template-columns:1fr;}
+    .fchecks label{padding-left:0;padding-right:0;}
+    .fchecks label:nth-child(odd){border-right:0;}
+    .fsubmit{width:100%;}
+  }
+
   @media(max-width:1100px){
     :root{--pad:34px;}
     .line-item{padding:40px;}
     .gp-grid{grid-template-columns:1fr 1fr;gap:40px;}
   }
-  @media(max-width:860px){
-    :root{--pad:22px;}
+  /* Nav collapses at 940px, NOT 860px. Measured: brand 319 + four links 484 +
+     gap 24 + padding 68 = 895px minimum for the four-item bar. At the old 860px
+     drawer breakpoint the 861-894px band rendered a wrapped two-line "Request
+     access", a 120px header, and a hero overshooting the viewport by 29px. */
+  @media(max-width:940px){
+    :root{--nav-h:73px;}
     .nav-inner{padding:14px var(--pad);}
     .mark{width:44px;height:44px;}
     .brand .name{font-size:var(--t-base);letter-spacing:.12em;}
@@ -338,6 +513,9 @@
     .navlink{text-align:left;padding:14px 6px;font-size:var(--t-base);}
     .btn-access{margin:12px 0 0;width:100%;padding:15px;display:block;}
     .menu-toggle{display:block;}
+  }
+  @media(max-width:860px){
+    :root{--pad:22px;}
     .lines-3{grid-template-columns:1fr;}
     .gp-grid{grid-template-columns:1fr 1fr;gap:30px;}
     .line-item{border-right:0;border-bottom:1px solid var(--line-soft);padding:36px 0;}
@@ -351,8 +529,6 @@
        line above it is the fallback. 73px is the mobile nav. */
     .hero{
       align-items:flex-start;
-      min-height:calc(100vh - 73px);
-      min-height:calc(100svh - 73px);
       padding:40px 0 72px;
     }
     .page-head{padding:72px 0 32px;}
@@ -398,6 +574,7 @@
     <div style="display:flex;align-items:center;">
       <nav class="links" id="links">
         <button class="navlink" data-tab="portfolio">Portfolio</button>
+        <button class="navlink" data-tab="incubator">Incubator</button>
         <button class="navlink" data-tab="team">Team</button>
         <a class="btn-access" href="mailto:contact@aurelianlabs.ai?subject=Aurelian%20Ventures%20Fund%20I%20Enquiry">Request access</a>
       </nav>
@@ -491,29 +668,7 @@
         </ul>
       </div>
 
-      <!-- 2. how the incubator works -->
-      <div class="idx-group idx-group--labelled reveal">
-        <div class="idx-label">Incubator</div>
-        <div class="lines-3">
-          <div class="line-item">
-            <span class="no">Invest</span>
-            <h3 class="h3">Fund I</h3>
-            <p>First institutional capital in the founding rounds of teams rebuilding compute, settlement, and intelligence.</p>
-          </div>
-          <div class="line-item">
-            <span class="no">Build</span>
-            <h3 class="h3">In-house</h3>
-            <p>We create companies ourselves where a foundation is missing and the right team is not yet formed.</p>
-          </div>
-          <div class="line-item">
-            <span class="no">Advise</span>
-            <h3 class="h3">Capital markets</h3>
-            <p>We advise institutions navigating the same shift, which shows us where demand is forming early.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 3. what's in the pipeline -->
+      <!-- 2. what's in the pipeline -->
       <div class="idx-group reveal">
         <div class="idx-label">Current opportunities</div>
         <p class="idx-note">Founding-round positions in the current fund pipeline. Companies are named in diligence.</p>
@@ -567,6 +722,341 @@
             </div>
           </li>
         </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ============ INCUBATOR ============ -->
+<section class="page" id="incubator">
+  <div class="wrap">
+    <div class="page-head reveal">
+      <h1 class="display">Build with Aurelian Ventures</h1>
+    </div>
+    <hr class="rule">
+    <div class="page-body">
+
+      <!-- what the incubator is: the band lifted out of Portfolio -->
+      <div class="idx-group reveal">
+        <div class="idx-label">Incubator</div>
+        <div class="lines-3">
+          <div class="line-item">
+            <span class="no">Invest</span>
+            <h3 class="h3">Fund I</h3>
+            <p>First institutional capital in the founding rounds of teams rebuilding compute, settlement, and intelligence.</p>
+          </div>
+          <div class="line-item">
+            <span class="no">Build</span>
+            <h3 class="h3">In-house</h3>
+            <p>We create companies ourselves where a foundation is missing and the right team is not yet formed.</p>
+          </div>
+          <div class="line-item">
+            <span class="no">Advise</span>
+            <h3 class="h3">Capital markets</h3>
+            <p>We advise institutions navigating the same shift, which shows us where demand is forming early.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="idx-group reveal">
+        <div class="idx-label">Apply</div>
+        <p class="idx-note">We work hands-on with a small number of teams each cohort, on product, AI engineering, distribution, operations, hiring, and growth. This is not a traditional accelerator. We take on companies where we can create real operational leverage and compress years of execution into months.</p>
+        <p class="idx-note" style="color:var(--sage-dim);">Twenty questions, about ten minutes.</p>
+
+        <form class="apply" id="applyForm" novalidate>
+          <div style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
+            <label>Do not fill this in<input type="text" name="_gotcha" tabindex="-1" autocomplete="off"></label>
+          </div>
+
+        <div class="fgroup">
+          <div class="flabel">Founder</div>
+          <ul class="fields">
+            <li class="field" data-field="founder_name">
+              <div class="fnum">I</div>
+              <div class="fbody">
+                <div class="fhead">
+                  <label class="fq" id="f-founder_name-q" for="f-founder_name">Founder name</label>
+                  
+                </div>
+              <input class="fctl" type="text" id="f-founder_name" name="founder_name" data-required="1" autocomplete="name">
+                <p class="ferr" id="f-founder_name-err" hidden></p>
+              </div>
+            </li>
+            <li class="field" data-field="founder_email">
+              <div class="fnum">II</div>
+              <div class="fbody">
+                <div class="fhead">
+                  <label class="fq" id="f-founder_email-q" for="f-founder_email">Founder email</label>
+                  
+                </div>
+              <input class="fctl" type="email" id="f-founder_email" name="founder_email" data-required="1" autocomplete="email">
+                <p class="ferr" id="f-founder_email-err" hidden></p>
+              </div>
+            </li>
+            <li class="field" data-field="position_role">
+              <div class="fnum">III</div>
+              <div class="fbody">
+                <div class="fhead">
+                  <label class="fq" id="f-position_role-q" for="f-position_role">Position or role</label>
+                  
+                </div>
+              <input class="fctl" type="text" id="f-position_role" name="position_role" placeholder="Founder, CEO, CTO" autocomplete="off">
+                <p class="ferr" id="f-position_role-err" hidden></p>
+              </div>
+            </li>
+            <li class="field" data-field="linkedin_url">
+              <div class="fnum">IV</div>
+              <div class="fbody">
+                <div class="fhead">
+                  <label class="fq" id="f-linkedin_url-q" for="f-linkedin_url">LinkedIn profile</label>
+                  
+                </div>
+              <input class="fctl" type="url" id="f-linkedin_url" name="linkedin_url" placeholder="https://linkedin.com/in/…" autocomplete="off">
+                <p class="ferr" id="f-linkedin_url-err" hidden></p>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="fgroup">
+          <div class="flabel">Company</div>
+          <ul class="fields">
+            <li class="field" data-field="company_name">
+              <div class="fnum">V</div>
+              <div class="fbody">
+                <div class="fhead">
+                  <label class="fq" id="f-company_name-q" for="f-company_name">Company name</label>
+                  
+                </div>
+              <input class="fctl" type="text" id="f-company_name" name="company_name" data-required="1" autocomplete="organization">
+                <p class="ferr" id="f-company_name-err" hidden></p>
+              </div>
+            </li>
+            <li class="field" data-field="company_url">
+              <div class="fnum">VI</div>
+              <div class="fbody">
+                <div class="fhead">
+                  <label class="fq" id="f-company_url-q" for="f-company_url">Company website or GitHub repository</label>
+                  
+                </div>
+              <input class="fctl" type="url" id="f-company_url" name="company_url" placeholder="https://…" autocomplete="off">
+                <p class="ferr" id="f-company_url-err" hidden></p>
+              </div>
+            </li>
+            <li class="field" data-field="company_location">
+              <div class="fnum">VII</div>
+              <div class="fbody">
+                <div class="fhead">
+                  <label class="fq" id="f-company_location-q" for="f-company_location">Where is the company based?</label>
+                  
+                </div>
+              <input class="fctl" type="text" id="f-company_location" name="company_location" placeholder="City, Country" autocomplete="off">
+                <p class="ferr" id="f-company_location-err" hidden></p>
+              </div>
+            </li>
+            <li class="field" data-field="industry">
+              <div class="fnum">VIII</div>
+              <div class="fbody">
+                <div class="fhead">
+                  <label class="fq" id="f-industry-q" for="f-industry">Industry or sector</label>
+                  
+                </div>
+              <select class="fctl" id="f-industry" name="industry"><option value="">Select</option><option value="AI / Infrastructure">AI / Infrastructure</option><option value="Fintech">Fintech</option><option value="Healthcare">Healthcare</option><option value="Enterprise SaaS">Enterprise SaaS</option><option value="Developer Tools">Developer Tools</option><option value="Consumer">Consumer</option><option value="Marketplaces">Marketplaces</option><option value="Robotics">Robotics</option><option value="Climate">Climate</option><option value="Education">Education</option><option value="Media">Media</option><option value="Other">Other</option></select>
+                <p class="ferr" id="f-industry-err" hidden></p>
+              </div>
+            </li>
+            <li class="field" data-field="team_size">
+              <div class="fnum">IX</div>
+              <div class="fbody">
+                <div class="fhead">
+                  <label class="fq" id="f-team_size-q" for="f-team_size">Team size</label>
+                  
+                </div>
+              <select class="fctl" id="f-team_size" name="team_size"><option value="">Select</option><option value="Solo founder">Solo founder</option><option value="2–5">2–5</option><option value="6–10">6–10</option><option value="11–25">11–25</option><option value="25+">25+</option></select>
+                <p class="ferr" id="f-team_size-err" hidden></p>
+              </div>
+            </li>
+            <li class="field" data-field="current_stage">
+              <div class="fnum">X</div>
+              <div class="fbody">
+                <div class="fhead">
+                  <label class="fq" id="f-current_stage-q" for="f-current_stage">Current stage</label>
+                  
+                </div>
+              <select class="fctl" id="f-current_stage" name="current_stage"><option value="">Select</option><option value="Idea stage">Idea stage</option><option value="MVP built">MVP built</option><option value="Beta / early users">Beta / early users</option><option value="Revenue generating">Revenue generating</option><option value="Scaling">Scaling</option><option value="Raising capital">Raising capital</option></select>
+                <p class="ferr" id="f-current_stage-err" hidden></p>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="fgroup">
+          <div class="flabel">What you're building</div>
+          <ul class="fields">
+            <li class="field" data-field="what_you_do">
+              <div class="fnum">XI</div>
+              <div class="fbody">
+                <div class="fhead">
+                  <label class="fq" id="f-what_you_do-q" for="f-what_you_do">What does your company do?</label>
+                  <span class="fmeta"><span class="fcount" data-for="f-what_you_do">0</span> / 200</span>
+                </div>
+              <p class="fhelp">Explain it simply and clearly.</p>
+              <input class="fctl" type="text" id="f-what_you_do" name="what_you_do" maxlength="200" autocomplete="off">
+                <p class="ferr" id="f-what_you_do-err" hidden></p>
+              </div>
+            </li>
+            <li class="field" data-field="problem">
+              <div class="fnum">XII</div>
+              <div class="fbody">
+                <div class="fhead">
+                  <label class="fq" id="f-problem-q" for="f-problem">What problem are you solving, and for who?</label>
+                  <span class="fmeta"><span class="fcount" data-for="f-problem">0</span> / 750</span>
+                </div>
+              <p class="fhelp">The problem, the customer, and why it matters.</p>
+              <textarea class="fctl" id="f-problem" name="problem" rows="4" maxlength="750" data-lenis-prevent></textarea>
+                <p class="ferr" id="f-problem-err" hidden></p>
+              </div>
+            </li>
+            <li class="field" data-field="traction">
+              <div class="fnum">XIII</div>
+              <div class="fbody">
+                <div class="fhead">
+                  <label class="fq" id="f-traction-q" for="f-traction">What traction or progress have you made so far?</label>
+                  <span class="fmeta">Recommended</span>
+                </div>
+              <p class="fhelp">Revenue, users, pilots, partnerships, retention, waitlist, product milestones.</p>
+              <textarea class="fctl" id="f-traction" name="traction" rows="4" data-lenis-prevent></textarea>
+                <p class="ferr" id="f-traction-err" hidden></p>
+              </div>
+            </li>
+            <li class="field" data-field="why_now">
+              <div class="fnum">XIV</div>
+              <div class="fbody">
+                <div class="fhead">
+                  <label class="fq" id="f-why_now-q" for="f-why_now">Why is now the right time for this company to exist?</label>
+                  <span class="fmeta">Optional</span>
+                </div>
+              <p class="fhelp">Market shifts, technology changes, behaviour changes, or the insight that makes this possible now.</p>
+              <textarea class="fctl" id="f-why_now" name="why_now" rows="4" data-lenis-prevent></textarea>
+                <p class="ferr" id="f-why_now-err" hidden></p>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="fgroup">
+          <div class="flabel">Fit and support</div>
+          <ul class="fields">
+            <li class="field" data-field="fit">
+              <div class="fnum">XV</div>
+              <div class="fbody">
+                <div class="fhead">
+                  <label class="fq" id="f-fit-q" for="f-fit">Why is your company a strong fit for Aurelian Ventures?</label>
+                  <span class="fmeta"><span class="fcount" data-for="f-fit">0</span> / 1500</span>
+                </div>
+              <p class="fhelp">We look for founders where Aurelian can materially accelerate execution and company building.</p>
+              <textarea class="fctl" id="f-fit" name="fit" rows="4" maxlength="1500" data-lenis-prevent></textarea>
+                <p class="ferr" id="f-fit-err" hidden></p>
+              </div>
+            </li>
+            <li class="field" data-field="bottlenecks">
+              <div class="fnum">XVI</div>
+              <div class="fbody">
+                <div class="fhead">
+                  <label class="fq" id="f-bottlenecks-q" for="f-bottlenecks">What are the biggest bottlenecks slowing your growth?</label>
+                  <span class="fmeta"><span class="fcount" data-for="f-bottlenecks">0</span> / 1500</span>
+                </div>
+              <textarea class="fctl" id="f-bottlenecks" name="bottlenecks" rows="4" maxlength="1500" data-lenis-prevent></textarea>
+                <p class="ferr" id="f-bottlenecks-err" hidden></p>
+              </div>
+            </li>
+            <li class="field" data-field="support_areas">
+              <div class="fnum">XVII</div>
+              <div class="fbody">
+                <div class="fhead">
+                  <label class="fq" id="f-support_areas-q" for="f-support_areas">Where would support from Aurelian be most valuable?</label>
+                  <span class="fmeta">Select all that apply</span>
+                </div>
+              <div class="fchecks" role="group" aria-labelledby="f-support_areas-q">
+                <label><input type="checkbox" name="support_areas" value="Backend engineering">Backend engineering</label>
+                <label><input type="checkbox" name="support_areas" value="AI / data engineering">AI / data engineering</label>
+                <label><input type="checkbox" name="support_areas" value="Product development">Product development</label>
+                <label><input type="checkbox" name="support_areas" value="GTM / distribution">GTM / distribution</label>
+                <label><input type="checkbox" name="support_areas" value="Fundraising support">Fundraising support</label>
+                <label><input type="checkbox" name="support_areas" value="Operations &amp; systems">Operations &amp; systems</label>
+                <label><input type="checkbox" name="support_areas" value="Recruiting">Recruiting</label>
+                <label><input type="checkbox" name="support_areas" value="Partnerships">Partnerships</label>
+                <label><input type="checkbox" name="support_areas" value="Design / branding">Design / branding</label>
+                <label><input type="checkbox" name="support_areas" value="Other">Other</label>
+              </div>
+                <p class="ferr" id="f-support_areas-err" hidden></p>
+              </div>
+            </li>
+            <li class="field" data-field="unfair_advantage">
+              <div class="fnum">XVIII</div>
+              <div class="fbody">
+                <div class="fhead">
+                  <label class="fq" id="f-unfair_advantage-q" for="f-unfair_advantage">What unfair advantage does your team have?</label>
+                  <span class="fmeta">Optional</span>
+                </div>
+              <p class="fhelp">Expertise, insight, access, distribution, technical advantage, domain experience.</p>
+              <textarea class="fctl" id="f-unfair_advantage" name="unfair_advantage" rows="4" data-lenis-prevent></textarea>
+                <p class="ferr" id="f-unfair_advantage-err" hidden></p>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="fgroup">
+          <div class="flabel">Materials</div>
+          <ul class="fields">
+            <li class="field" data-field="materials_url">
+              <div class="fnum">XIX</div>
+              <div class="fbody">
+                <div class="fhead">
+                  <label class="fq" id="f-materials_url-q" for="f-materials_url">Pitch deck, demo, or supporting materials</label>
+                  <span class="fmeta">Optional</span>
+                </div>
+              <p class="fhelp">Paste a link to a deck, Loom, Figma, one-pager, or demo.</p>
+              <input class="fctl" type="url" id="f-materials_url" name="materials_url" autocomplete="off">
+                <p class="ferr" id="f-materials_url-err" hidden></p>
+              </div>
+            </li>
+            <li class="field" data-field="anything_else">
+              <div class="fnum">XX</div>
+              <div class="fbody">
+                <div class="fhead">
+                  <label class="fq" id="f-anything_else-q" for="f-anything_else">Anything else we should know?</label>
+                  <span class="fmeta">Optional</span>
+                </div>
+              <textarea class="fctl" id="f-anything_else" name="anything_else" rows="4" data-lenis-prevent></textarea>
+                <p class="ferr" id="f-anything_else-err" hidden></p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+          <div class="fsummary" id="applySummary" hidden>
+            <h3>Some answers still need attention</h3>
+            <ul id="applySummaryList"></ul>
+          </div>
+
+          <div class="fnotice" data-notice-version="1.0">
+            <span class="fnk">Before you send</span>
+            <p>Submitting this form does not create an NDA or any duty of confidentiality. We review many companies and may already be working with, or later back, one like yours. Send only what you are comfortable sharing.</p>
+            <p>We use what you send to evaluate your company and to contact you about it. We do not sell it, and we do not add you to any mailing list. Applications are deleted after 24 months. <button type="button" class="lnk" data-tab="privacy" style="background:none;border:0;padding:0;font:inherit;color:var(--gold);border-bottom:1px solid var(--line);cursor:pointer;">Privacy notice</button></p>
+            <p>By submitting, you agree to the above.</p>
+            <button type="button" class="fsubmit" id="applySubmit">Apply to Aurelian Ventures</button>
+            <p class="fnote-inline" id="applyStatus" role="status" aria-live="polite"></p>
+          </div>
+        </form>
+
+        <div class="fdone" id="applyDone" tabindex="-1" hidden>
+          <h2>Application received</h2>
+          <p>Thanks for applying to Aurelian Ventures. Every application is read by the team. We follow up when there is a fit.</p>
+        </div>
+
+        <noscript>
+          <p class="idx-note" style="margin-top:24px;">This form needs JavaScript. Email <a href="mailto:contact@aurelianlabs.ai" style="color:var(--gold);">contact@aurelianlabs.ai</a> and we will send the questions.</p>
+        </noscript>
       </div>
 
     </div>
@@ -665,6 +1155,43 @@
   </div>
 </section>
 
+
+<!-- ============ PRIVACY ============ -->
+<section class="page" id="privacy">
+  <div class="wrap">
+    <div class="page-head reveal">
+      <h1 class="display">Privacy notice</h1>
+    </div>
+    <hr class="rule">
+    <div class="page-body">
+      <div class="idx-group reveal">
+        <div class="prose">
+          <p style="color:var(--sage-dim);font-size:var(--t-sm);">Version 1.0 &middot; 6 August 2026</p>
+
+          <h2>Who we are</h2>
+          <p>Aurelian Ventures, New York. For anything on this page, write to <a href="mailto:contact@aurelianlabs.ai">contact@aurelianlabs.ai</a>.</p>
+
+          <h2>What we collect</h2>
+          <p>Only what you type into the incubator application form: your name, email, role, LinkedIn profile, and the information you choose to give about your company. This site sets no cookies and runs no analytics or tracking of any kind.</p>
+          <p>Fonts on this site are served by Google Fonts, which receives your IP address as part of loading them.</p>
+
+          <h2>Why we use it</h2>
+          <p>To evaluate your company for the incubator and to contact you about your application. Nothing else. We do not sell it, we do not share it outside Aurelian, and we do not add applicants to any mailing list.</p>
+
+          <h2>How long we keep it</h2>
+          <p>Applications are deleted 24 months after they are submitted, unless we are working with you by then.</p>
+
+          <h2>Confidentiality</h2>
+          <p>Submitting an application does not create an NDA or any duty of confidentiality. We review many companies and may already be working with, or later back, one similar to yours. Send only what you are comfortable sharing.</p>
+
+          <h2>Your rights</h2>
+          <p>You can ask us for a copy of what you sent, ask us to correct it, or ask us to delete it. Email <a href="mailto:contact@aurelianlabs.ai">contact@aurelianlabs.ai</a> and we will act on it. If you are in the UK or EU, you also have the right to complain to your data protection authority.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 </main>
 
 <!-- ============ FOOTER ============ -->
@@ -682,7 +1209,9 @@
       </div>
       <div class="foot-links">
         <button data-tab="portfolio">Portfolio</button>
+        <button data-tab="incubator">Incubator</button>
         <button data-tab="team">Team</button>
+        <button data-tab="privacy">Privacy</button>
         <a href="https://aurelianlabs.ai">Aurelian Labs ↗</a>
       </div>
     </div>
@@ -749,6 +1278,11 @@
     else { window.scrollTo({top:0, behavior:'auto'}); }
     links.classList.remove('open');
     toggle.setAttribute('aria-expanded','false');
+    if (id !== 'home' && location.hash.slice(1) !== id) {
+      history.replaceState(null, '', '#' + id);
+    } else if (id === 'home' && location.hash) {
+      history.replaceState(null, '', location.pathname);
+    }
     runReveal();
   }
 
@@ -773,6 +1307,166 @@
     }, 1600);
   }
   runReveal();
+
+  // ---------------------------------------------------------------------
+  // Incubator application
+  // ---------------------------------------------------------------------
+  var form = document.getElementById('applyForm');
+  if (form) (function(){
+    var ENDPOINT = 'https://aurelianlabs.ai/crm/api/incubator/apply'; // no trailing
+    // slash — a trailing slash returns 308, and a browser refuses to follow a
+    // redirect on a CORS preflight, which surfaces as an opaque failure.
+    var DRAFT = 'av-incubator-draft-v1';
+    var btn = document.getElementById('applySubmit');
+    var status = document.getElementById('applyStatus');
+    var summary = document.getElementById('applySummary');
+    var summaryList = document.getElementById('applySummaryList');
+    var done = document.getElementById('applyDone');
+    var startedAt = Date.now();
+
+    // A <form> with no default button does not implicitly submit, so Enter in any
+    // of the ten single-line inputs is inert. The listener is belt and braces: a
+    // native submit would navigate, reset the SPA to #home, wipe all twenty
+    // fields, and put every answer in the query string.
+    form.addEventListener('submit', function(e){ e.preventDefault(); send(); });
+
+    // ---- character counters, warning at 90% not at the ceiling --------------
+    form.addEventListener('input', function(e){
+      var el = e.target;
+      if (!el.maxLength || el.maxLength < 0) return;
+      var c = form.querySelector('.fcount[data-for="' + el.id + '"]');
+      if (!c) return;
+      c.textContent = String(el.value.length);
+      c.setAttribute('data-near', el.value.length >= el.maxLength * 0.9 ? 'true' : 'false');
+    });
+
+    // ---- founders type acme.com; type=url would reject it -------------------
+    form.addEventListener('blur', function(e){
+      var el = e.target;
+      if (el.type !== 'url' || !el.value.trim()) return;
+      if (!/^https?:\/\//i.test(el.value.trim())) el.value = 'https://' + el.value.trim();
+    }, true);
+
+    // ---- draft, so a stray reload does not cost twenty minutes --------------
+    function fields(){ return form.querySelectorAll('.fctl, .fchecks input'); }
+    var saveTimer;
+    form.addEventListener('input', function(){
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(function(){
+        try {
+          var d = {};
+          fields().forEach(function(el){
+            if (el.type === 'checkbox') { d[el.name] = d[el.name] || []; if (el.checked) d[el.name].push(el.value); }
+            else if (el.value) d[el.name] = el.value;
+          });
+          localStorage.setItem(DRAFT, JSON.stringify(d));
+        } catch(err){}
+      }, 400);
+    });
+    try {
+      var saved = JSON.parse(localStorage.getItem(DRAFT) || 'null');
+      if (saved) fields().forEach(function(el){
+        var v = saved[el.name];
+        if (v === undefined) return;
+        if (el.type === 'checkbox') el.checked = Array.isArray(v) && v.indexOf(el.value) > -1;
+        else el.value = v;
+      });
+      form.dispatchEvent(new Event('input', {bubbles:true}));
+    } catch(err){}
+
+    // ---- validation --------------------------------------------------------
+    function rowOf(el){ return el.closest('.field'); }
+    function setError(el, msg){
+      var row = rowOf(el), err = row && row.querySelector('.ferr');
+      if (!row) return;
+      if (msg) { row.setAttribute('data-invalid',''); el.setAttribute('aria-invalid','true');
+                 if (err){ err.textContent = msg; err.hidden = false; } }
+      else { row.removeAttribute('data-invalid'); el.removeAttribute('aria-invalid');
+             if (err){ err.textContent = ''; err.hidden = true; } }
+    }
+    function validate(){
+      var bad = [];
+      form.querySelectorAll('[data-required="1"]').forEach(function(el){
+        var label = form.querySelector('label[for="' + el.id + '"]');
+        var name = label ? label.textContent.trim() : el.name;
+        if (!el.value.trim()) { setError(el, name + ' is required.'); bad.push({el:el, name:name}); return; }
+        if (el.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(el.value.trim())) {
+          setError(el, 'That does not look like an email address.'); bad.push({el:el, name:name}); return;
+        }
+        setError(el, '');
+      });
+      return bad;
+    }
+
+    function send(){
+      var bad = validate();
+      if (bad.length) {
+        summaryList.innerHTML = '';
+        bad.forEach(function(b){
+          var li = document.createElement('li');
+          var a = document.createElement('a');
+          a.href = '#'; a.textContent = b.name;
+          a.addEventListener('click', function(e){
+            e.preventDefault(); b.el.focus();
+            b.el.scrollIntoView({block:'center', behavior:'auto'});
+          });
+          li.appendChild(a); summaryList.appendChild(li);
+        });
+        summary.hidden = false;
+        summary.scrollIntoView({block:'center', behavior:'auto'});
+        return;
+      }
+      summary.hidden = true;
+
+      var noticeEl = form.querySelector('.fnotice');
+      var payload = {
+        started_at: startedAt,
+        support_areas: [],
+        notice_version: noticeEl ? noticeEl.getAttribute('data-notice-version') : ''
+      };
+      fields().forEach(function(el){
+        if (el.type === 'checkbox') { if (el.checked) payload.support_areas.push(el.value); }
+        else payload[el.name] = el.value.trim();
+      });
+      var hp = form.querySelector('[name="_gotcha"]');
+      payload._gotcha = hp ? hp.value : '';
+
+      btn.disabled = true;
+      var label = btn.textContent;
+      btn.textContent = 'Sending';
+      status.textContent = '';
+
+      fetch(ENDPOINT, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+      }).then(function(r){
+        return r.json().catch(function(){ return {}; }).then(function(j){ return {ok: r.ok, body: j}; });
+      }).then(function(res){
+        if (!res.ok) throw new Error(res.body && res.body.error || 'That did not go through.');
+        try { localStorage.removeItem(DRAFT); } catch(err){}
+        form.hidden = true;
+        done.hidden = false;
+        done.focus();
+        if (window.__lenis) window.__lenis.scrollTo(done, {offset:-140});
+        else done.scrollIntoView({block:'start'});
+      }).catch(function(err){
+        btn.disabled = false;
+        btn.textContent = label;
+        status.textContent = (err && err.message ? err.message : 'That did not go through.') +
+          ' You can email contact@aurelianlabs.ai instead — your answers are still here.';
+      });
+    }
+
+    btn.addEventListener('click', send);
+  })();
+
+  // open on the tab named in the URL, so #incubator can be linked directly
+  (function(){
+    var h = location.hash.slice(1);
+    if (h && document.getElementById(h) &&
+        document.getElementById(h).classList.contains('page')) show(h);
+  })();
 })();
 </script>
 </body>
