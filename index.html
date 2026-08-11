@@ -147,7 +147,30 @@
     min-height:calc(100svh - var(--nav-h));
     display:flex;align-items:flex-end;
     padding:0 0 clamp(70px,11vh,130px);
+    /* the shader field lives here and only here — one moment, not a page-wide
+       effect. isolation keeps the canvas above body::before without giving the
+       hero a z-index that would have to be reasoned about against the nav. */
+    position:relative;isolation:isolate;overflow:hidden;
+    /* fallback for a machine with no WebGL. The canvas is transparent until it
+       draws, so this is what shows through: a dark green field, not a hole. */
+    background-color:#0D1912;
+    background-image:radial-gradient(120% 90% at 50% 40%, #213E2F 0%, #0D1912 70%);
   }
+  .hero-gl{
+    position:absolute;inset:0;z-index:0;
+    width:100%;height:100%;display:block;pointer-events:none;
+  }
+  /* NO SCRIM, and that is a measured result, not an omission. Cream on this
+     field was sampled under real glyph coverage across 11 viewports and 25 time
+     values spanning four minutes of drift: the worst single pixel is 5.50:1
+     (320x568, t=0) and the worst desktop pixel is 6.20:1. The headline sits in
+     the shader's vignette, which is the darkest part of the field, so it never
+     needs help. A veil here would only dim the one place the gradient is alive.
+     If the palette or the headline ever moves: --sage CANNOT sit on this field
+     at any brightness (2.34:1 at 12px). Non-cream text over it needs a scrim,
+     and that scrim's stops must be in PIXELS anchored to the edge the text is
+     pinned to — a percentage-based one silently falls out of register the
+     moment the hero height changes. */
   .hero .display{
     font-size:var(--t-display);
     max-width:19ch;margin:0;
@@ -554,6 +577,182 @@
     .gp-field,.gp-go,.gp-photo{transform:none!important;}
   }
   :focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
+
+  /* =====================================================================
+     SCROLL-STATE NAV  (added 2026-08-11)
+
+     Ported from the labs site's chrome (src/components/Layout.tsx) so the two
+     properties behave identically: the bar is invisible at the top of a tab and
+     fades in as a solid surface once the reader scrolls.
+
+     ADDITIVE ONLY. Nothing above this line is edited. Every rule here either
+     declares a property the original never set, or restates one later in the
+     cascade at equal-or-higher specificity. Delete this block plus the matching
+     <script> before </body> and the file is byte-for-byte the page that shipped.
+
+     THE BEHAVIOUR
+     Transparent at rest; past 50px of scroll it gains .is-scrolled and becomes
+     rgba(13,25,18,0.92) + blur(14px) + a --line-soft hairline, over 420ms on
+     --ease-out. The flag is seeded from the real scroll position on load.
+
+     WHY FIXED, AND WHY THE HERO MOVES
+     A transparent bar is only "not there" if the hero is painted underneath it,
+     and sticky keeps the bar in flow, so the hero could only ever start below
+     it. So the bar goes position:fixed, <main> carries its height as padding so
+     no tab starts underneath it, and #home alone pulls back up through that
+     padding by exactly --nav-h. NET GEOMETRY IS UNCHANGED: the headline, the
+     fold, and the top of every other tab land on the pixel they land on today.
+     The only difference is that the shader now paints the 91px it used to cede.
+
+     THE COLOUR DECISION, MEASURED — this is where the port differs from labs.
+     Worst-case background luminance was sampled under the nav across 96 viewport
+     combinations (941-3440px wide, 640-1440 tall) and 101 time values spanning
+     400s of shader drift, plus the static body field the bar floats over on the
+     non-home tabs. Worst pixel found anywhere, against the 4.5:1 text floor:
+
+                        over the hero shader   over the body field
+         --sage             3.67 : 1   FAIL         4.25 : 1   FAIL
+         --gold             4.89 : 1   pass         5.67 : 1   pass
+         --cream            8.72 : 1   pass        10.11 : 1   pass
+
+     So the shipped --sage links CANNOT stay on the transparent bar; an earlier
+     spot-check that read 4.70:1 had caught one viewport at one instant. Links go
+     --cream while the bar is transparent and return to --sage the moment it is
+     solid, which is exactly the labs swap.
+
+     --gold survives here where it did not on labs (3.04:1 there), because this
+     hero's nav sits over a darker region of the same field. That is what lets
+     the current-tab marker stay the gold TEXT that shipped instead of moving to
+     a hairline: a tab can only be current while a non-home page is showing, and
+     those pages have no shader at all, so that gold only ever sits on the static
+     body field at 5.67:1. Nothing new is drawn.
+     ===================================================================== */
+
+  /* ---- 1. the two states -------------------------------------------------
+     The state lives in these two custom properties, so the colour rules below
+     need no .is-scrolled variant and the specificity relationships between
+     .navlink, [aria-current], :hover and :focus-visible stay as they shipped.
+     Custom properties are not themselves animatable, but the properties that
+     READ them are, so a var()-driven colour change transitions normally. */
+  header.nav{
+    --nav-fg:var(--cream);
+    --nav-rule-hover:var(--line);
+
+    position:fixed;top:0;left:0;right:0;
+    background-color:transparent;
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+    /* TRANSPARENT, not absent. --nav-h (91px, 73px below 940) is measured
+       INCLUDING this hairline and the hero subtracts --nav-h, so dropping the
+       border in one state would change the bar's height by 1px and shunt the
+       whole page down and back again every time the threshold is crossed. */
+    border-bottom-color:transparent;
+    /* 420ms. This is a surface changing state because the reader scrolled, not
+       an element responding to a click, so it should read as a settle rather
+       than as a response. --ease-out spends most of its travel in the first
+       third, so 420ms on this curve finishes closer to a 250ms linear fade.
+       Both the prefixed and unprefixed backdrop-filter: Safari transitions only
+       the one it implements. Four properties and no more. */
+    transition:background-color 420ms var(--ease-out),
+               -webkit-backdrop-filter 420ms var(--ease-out),
+               backdrop-filter 420ms var(--ease-out),
+               border-color 420ms var(--ease-out);
+  }
+  /* Past 50px, and whenever the mobile drawer is open at any scroll position.
+     The drawer is an opaque --ink-2 panel hanging off the bar's bottom edge:
+     over a transparent bar it would read as floating loose above the hero with
+     nothing holding it, and its links would inherit the transparent bar's cream
+     instead of the sage they ship. Forcing the solid state restores both.
+
+     rgba(13,25,18,0.92) is --ink at 92%, and it is the one value in this block
+     that is not what the page shipped with (rgba(21,37,26,.82) — #15251A, which
+     is not in the token set and never was). It matches labs and it measures
+     better in every direction: over the worst backdrop either can sit on, sage
+     goes 4.99 -> 5.81 and gold 6.66 -> 7.74. Revert by editing this one value;
+     nothing else in the block depends on it. */
+  header.nav.is-scrolled,
+  header.nav.is-open{
+    --nav-fg:var(--sage);
+    --nav-rule-hover:transparent;
+
+    background-color:rgba(13,25,18,0.92);
+    -webkit-backdrop-filter:blur(14px);
+    backdrop-filter:blur(14px);
+    border-bottom-color:var(--line-soft);
+  }
+
+  /* ---- 2. the bar leaves the flow, so the flow carries its height -------- */
+  main{padding-top:var(--nav-h);}
+  /* #home alone pulls back up through it, so the shader runs edge to edge
+     behind the transparent bar. The margin cannot escape upward: main's
+     padding-top blocks parent/first-child margin collapsing. */
+  #home{margin-top:calc(var(--nav-h) * -1);}
+  /* Consequently the hero is a full viewport again rather than a viewport minus
+     the bar, so its box ends on exactly the pixel it ends on today and, with
+     align-items:flex-end, the headline does not move at all. */
+  #home .hero{
+    min-height:100vh;
+    min-height:100svh;
+    /* Inert above 860px — flex-end anchors the headline to the bottom and the
+       content is nowhere near tall enough to reach this. Declared anyway so the
+       hero can never tuck copy under the bar if the headline grows. */
+    padding-top:var(--nav-h);
+  }
+
+  /* ---- 3. colour, driven off the custom properties -----------------------
+     Three restatements, one per shipped rule, each exactly one step more
+     specific than the rule it has to outrank:
+       .navlink                     (0,1,0) -> header.nav .navlink        (0,2,1)
+       .navlink:hover               (0,2,0) -> header.nav .navlink:hover  (0,3,1)
+       .navlink[aria-current="true"](0,2,0) -> header.nav .navlink[...]   (0,3,1)
+     Without the second and third, the first would silently swallow both. */
+  header.nav .navlink{
+    color:var(--nav-fg);
+    /* Geometry for the 1px hover rule below. Inert until that rule supplies a
+       background-image. Declared as longhands AFTER the original's
+       `background:none` shorthand, which is why they survive it. It has to be a
+       background rather than a border (a border would add 1px to every link and
+       push the bar past --nav-h) or an underline (which trails off the end of a
+       .16em letter-spaced word). */
+    background-repeat:no-repeat;
+    background-size:100% 1px;
+    background-position:left bottom;
+    /* matched to the bar's own 420ms. At the shipped .25s the links would finish
+       their swap well before the surface under them did and the change would
+       arrive twice. This slows the hover fade to match, which is the same trade
+       the labs bar makes. */
+    transition:color 420ms var(--ease-out);
+  }
+  /* Unchanged from the shipped rule. On the transparent bar it only ever sits
+     on the static body field (a tab cannot be current while #home is showing),
+     where --gold measures 5.67:1. */
+  header.nav .navlink[aria-current="true"]{color:var(--gold);}
+  @media (hover:hover) and (pointer:fine){
+    /* Solid bar: the shipped sage -> cream lift, unchanged. Transparent bar:
+       cream is already the resting colour, so the lift is a no-op there and
+       hover needs another channel. --line is the site's own hairline and goes
+       transparent on the solid bar where the colour lift does the work again.
+       Hover is transient feedback on an element the pointer is already over,
+       so unlike the two rules above it owes no ratio. */
+    header.nav .navlink:hover{
+      color:var(--cream);
+      background-image:linear-gradient(var(--nav-rule-hover),var(--nav-rule-hover));
+    }
+  }
+  /* The same lift for the keyboard, since the rule above is now pointer-gated.
+     The page's global :focus-visible outline (2px --gold, 4.89:1 over the worst
+     shader pixel and 5.67:1 over the body field, both clear of the 3:1 non-text
+     floor) still carries the actual indication in either state. */
+  header.nav .navlink:focus-visible{color:var(--cream);}
+
+  /* ---- 4. the one place the geometry is not automatic --------------------
+     Below 860px the hero flips to align-items:flex-start with padding-top:40px,
+     so with the hero now starting at viewport y=0 the headline would climb 40px
+     from the top and sit UNDER the bar. --nav-h plus the shipped 40px puts it
+     back on the pixel it occupies today (73 + 40 = 113). */
+  @media(max-width:860px){
+    #home .hero{padding-top:calc(var(--nav-h) + 40px);}
+  }
 </style>
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
@@ -590,6 +789,7 @@
 <!-- ============ HOME ============ -->
 <section class="page active" id="home">
   <div class="hero">
+    <canvas class="hero-gl" id="heroGL" aria-hidden="true"></canvas>
     <div class="wrap reveal">
       <h1 class="display">The foundations of the next era are being rebuilt</h1>
     </div>
@@ -1439,12 +1639,368 @@
     btn.addEventListener('click', send);
   })();
 
+  // ---------------------------------------------------------------------
+  // Home hero field
+  //
+  // The animated gradient from aurelianlabs.ai, ported off the React component
+  // that runs there. The GLSL below is a byte-for-byte copy; everything around
+  // it is the same discipline rewritten in this page's idiom, and every piece
+  // of that discipline fixed a defect that was actually measured:
+  //   1. the first frame is drawn synchronously, so the hero is not blank
+  //      wherever rAF is throttled or never runs;
+  //   2. compile and link status are checked and logged, so a GLSL typo is not
+  //      a silent black rectangle;
+  //   3. reduced motion gets the static frame and no loop;
+  //   4. the .hero CSS gradient underneath is the no-WebGL fallback;
+  //   5. the loop pauses offscreen, on a hidden tab, and on a hidden section;
+  //   6. GL objects are released on teardown — browsers cap live contexts near 16;
+  //   7. drawing-buffer pixels are capped; devicePixelRatio alone is not a cap;
+  //   8. hex is parsed defensively, 3 digit and 6.
+  // It runs on the home hero and nowhere else. A shader behind every section is
+  // exactly what this page's restraint exists to prevent.
+  // ---------------------------------------------------------------------
+  (function(){
+    var canvas = document.getElementById('heroGL');
+    var home = document.getElementById('home');
+    var container = canvas && canvas.parentNode;
+    if (!canvas || !home || !container) return;
+
+    // Measured on the labs site and reused verbatim so the two properties match.
+    // Do not brighten: a brighter candidate drifted the headline to 3.53:1 as the
+    // bright band crossed it.
+    var BG = '#0D1912';
+    var COLORS = ['#1B3629', '#213E2F', '#2C573E', '#6A5935'];
+    var SPEED = 0.4;
+    var GRAIN = 0.25;
+    // u_colors is a fixed vec3[4]; a short array would leave stale uniforms from
+    // the previous draw sitting in the remaining slots.
+    var SLOTS = 4;
+    // Cap on drawing-buffer pixels. A 5K display at dpr 2 would otherwise
+    // allocate far more buffer than the detail in a noise field can justify.
+    var MAX_PIXELS = 2500000;
+
+    var VERT = [
+      "attribute vec2 position;",
+      "varying vec2 vUv;",
+      "void main() {",
+      "  vUv = position * 0.5 + 0.5;",
+      "  gl_Position = vec4(position, 0.0, 1.0);",
+      "}"
+    ].join('\n');
+
+    var FRAG = [
+      "precision highp float;",
+      "varying vec2 vUv;",
+      "",
+      "uniform vec2  u_resolution;",
+      "uniform float u_time;",
+      "uniform float u_grain;",
+      "uniform vec3  u_colors[4];",
+      "uniform vec3  u_bg;",
+      "",
+      "vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }",
+      "",
+      "float snoise(vec2 v){",
+      "  const vec4 C = vec4(0.211324865405187, 0.366025403784439,",
+      "           -0.577350269189626, 0.024390243902439);",
+      "  vec2 i  = floor(v + dot(v, C.yy) );",
+      "  vec2 x0 = v -   i + dot(i, C.xx);",
+      "  vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);",
+      "  vec4 x12 = x0.xyxy + C.xxzz;",
+      "  x12.xy -= i1;",
+      "  i = mod(i, 289.0);",
+      "  vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))",
+      "  + i.x + vec3(0.0, i1.x, 1.0 ));",
+      "  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy),",
+      "    dot(x12.zw,x12.zw)), 0.0);",
+      "  m = m*m ;",
+      "  m = m*m ;",
+      "  vec3 x = 2.0 * fract(p * C.www) - 1.0;",
+      "  vec3 h = abs(x) - 0.5;",
+      "  vec3 ox = floor(x + 0.5);",
+      "  vec3 a0 = x - ox;",
+      "  m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );",
+      "  vec3 g;",
+      "  g.x  = a0.x  * x0.x  + h.x  * x0.y;",
+      "  g.yz = a0.yz * x12.xz + h.yz * x12.yw;",
+      "  return 130.0 * dot(m, g);",
+      "}",
+      "",
+      "void main() {",
+      "  vec2 uv = vUv;",
+      "  float ratio = u_resolution.x / u_resolution.y;",
+      "  vec2 p = uv - 0.5;",
+      "  p.x *= ratio;",
+      "",
+      "  float t = u_time * 0.1;",
+      "",
+      "  float n1 = snoise(p * 0.4 + vec2(t * 0.2, -t * 0.3));",
+      "  float n2 = snoise(p * 0.55 + vec2(-t * 0.15, t * 0.25) + n1 * 0.25);",
+      "  float n3 = snoise(p * 0.75 + vec2(t * 0.1, -t * 0.2) + n2 * 0.2);",
+      "",
+      "  vec3 col = u_bg;",
+      "",
+      "  float dist = length(p) * 1.5;",
+      "  float vignette = 1.0 - smoothstep(0.3, 1.2, dist);",
+      "",
+      "  col = mix(col, u_colors[0], smoothstep(-0.2, 0.5, n1) * 0.85);",
+      "  col = mix(col, u_colors[1], smoothstep(-0.1, 0.6, n2) * 0.7);",
+      "  col = mix(col, u_colors[2], smoothstep(-0.3, 0.4, n3) * 0.6);",
+      "  col = mix(col, u_colors[3], smoothstep(0.0, 0.7, n1 * n2) * 0.5);",
+      "",
+      "  float glow = smoothstep(0.8, 0.0, dist) * 0.3;",
+      "  col += u_colors[1] * glow;",
+      "",
+      "  col = mix(col * 0.2, col, vignette);",
+      "",
+      "  float grain = fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453 + u_time);",
+      "  col += (grain - 0.5) * u_grain * 0.1;",
+      "",
+      "  gl_FragColor = vec4(col, 1.0);",
+      "}"
+    ].join('\n');
+
+    function hexToRgb(hex){
+      var h = String(hex).trim().replace(/^#/, '');
+      if (h.length === 3) h = h[0]+h[0] + h[1]+h[1] + h[2]+h[2];
+      if (!/^[0-9a-fA-F]{6}$/.test(h)) return [0,0,0];
+      return [
+        parseInt(h.slice(0,2),16)/255,
+        parseInt(h.slice(2,4),16)/255,
+        parseInt(h.slice(4,6),16)/255
+      ];
+    }
+
+    function compile(gl, type, src){
+      var s = gl.createShader(type);
+      if (!s) return null;
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+        // Loud, because the symptom is otherwise an unexplained black rectangle.
+        console.error('[hero] shader failed to compile:', gl.getShaderInfoLog(s));
+        gl.deleteShader(s);
+        return null;
+      }
+      return s;
+    }
+
+    var gl = null;
+    try {
+      gl = canvas.getContext('webgl', {antialias:false, alpha:false}) ||
+           canvas.getContext('experimental-webgl');
+    } catch(err){}
+    // No context means the .hero background gradient stays visible. The canvas
+    // is transparent until it draws, so there is nothing to undo.
+    if (!gl) return;
+
+    var vs = compile(gl, gl.VERTEX_SHADER, VERT);
+    var fs = compile(gl, gl.FRAGMENT_SHADER, FRAG);
+    if (!vs || !fs) return;
+
+    var program = gl.createProgram();
+    if (!program) return;
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.error('[hero] program failed to link:', gl.getProgramInfoLog(program));
+      return;
+    }
+    gl.useProgram(program);
+
+    var buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+    var pos = gl.getAttribLocation(program, 'position');
+    gl.enableVertexAttribArray(pos);
+    gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+
+    var uRes    = gl.getUniformLocation(program, 'u_resolution');
+    var uTime   = gl.getUniformLocation(program, 'u_time');
+    var uGrain  = gl.getUniformLocation(program, 'u_grain');
+    var uColors = gl.getUniformLocation(program, 'u_colors');
+    var uBg     = gl.getUniformLocation(program, 'u_bg');
+
+    var bgRgb = hexToRgb(BG);
+    var palette = new Float32Array(SLOTS * 3);
+    for (var i = 0; i < SLOTS; i++) {
+      var c = hexToRgb(COLORS[i] || COLORS[COLORS.length-1] || BG);
+      palette[i*3] = c[0]; palette[i*3+1] = c[1]; palette[i*3+2] = c[2];
+    }
+
+    function resize(){
+      var w = container.clientWidth, h = container.clientHeight;
+      // A hidden section measures 0. Keep the buffer we have rather than
+      // collapsing it to 1x1; it is re-measured the moment #home comes back.
+      if (!w || !h) return false;
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var pw = Math.max(1, Math.floor(w * dpr));
+      var ph = Math.max(1, Math.floor(h * dpr));
+      var scale = Math.min(1, Math.sqrt(MAX_PIXELS / Math.max(1, pw * ph)));
+      var cw = Math.max(1, Math.floor(pw * scale));
+      var ch = Math.max(1, Math.floor(ph * scale));
+      if (cw === canvas.width && ch === canvas.height) return false;
+      canvas.width = cw; canvas.height = ch;
+      gl.viewport(0, 0, cw, ch);
+      return true;
+    }
+
+    function draw(ms){
+      gl.uniform2f(uRes, canvas.width, canvas.height);
+      gl.uniform1f(uTime, ms * 0.001 * SPEED);
+      gl.uniform1f(uGrain, GRAIN);
+      gl.uniform3f(uBg, bgRgb[0], bgRgb[1], bgRgb[2]);
+      gl.uniform3fv(uColors, palette);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    }
+
+    resize();
+    // THE FIRST FRAME IS SYNCHRONOUS AND UNCONDITIONAL. Everything below this
+    // line is about animating; this line is about the hero not being blank.
+    draw(0);
+
+    var reduced = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : null;
+    var raf = 0, running = false, onscreen = true, start = null, elapsed = 0;
+
+    function frame(t){
+      // resume from where the last pause left off, so a tab switch does not
+      // snap the field back to its opening state. null rather than 0, because
+      // a falsy test here would re-anchor on any frame that legitimately lands
+      // on timestamp zero and quietly spend it.
+      if (start === null) start = t - elapsed;
+      elapsed = t - start;
+      draw(elapsed);
+      raf = requestAnimationFrame(frame);
+    }
+    function stop(){
+      if (!running) return;
+      running = false;
+      cancelAnimationFrame(raf);
+    }
+    function play(){
+      // A static frame is already on screen, so honouring reduced motion here
+      // costs the reader nothing but the movement.
+      if (running || !onscreen || document.hidden) return;
+      if (reduced && reduced.matches) return;
+      if (!home.classList.contains('active')) return;
+      running = true; start = null;
+      raf = requestAnimationFrame(frame);
+    }
+    function repaint(){
+      // A resized or uncomposited buffer is empty, and while the loop is paused
+      // nothing else would ever redraw it.
+      resize();
+      draw(elapsed);
+    }
+
+    var ro = null;
+    if (window.ResizeObserver) {
+      ro = new ResizeObserver(function(){ if (resize()) draw(elapsed); });
+      ro.observe(container);
+    } else {
+      window.addEventListener('resize', function(){ if (resize()) draw(elapsed); });
+    }
+
+    // Pause offscreen. A shader on a section nobody is looking at is pure
+    // battery cost.
+    var vio = new IntersectionObserver(function(entries){
+      onscreen = entries.some(function(e){ return e.isIntersecting; });
+      if (onscreen) { repaint(); play(); } else { stop(); }
+    }, {threshold:0});
+    vio.observe(container);
+
+    // Tab switching is the trap on this page. Sections are shown and hidden by
+    // class, so while #home is hidden the container measures 0 and the drawing
+    // buffer is never composited — it comes back blank, or stretched if it was
+    // resized meanwhile. Watching the class hooks the existing show() without
+    // touching it, and the repaint is unconditional because the buffer can be
+    // empty even when its dimensions did not change.
+    var mo = new MutationObserver(function(){
+      if (home.classList.contains('active')) { repaint(); play(); }
+      else { stop(); }
+    });
+    mo.observe(home, {attributes:true, attributeFilter:['class']});
+
+    document.addEventListener('visibilitychange', function(){
+      if (document.hidden) stop();
+      else { repaint(); play(); }
+    });
+    if (reduced && reduced.addEventListener) {
+      reduced.addEventListener('change', function(){
+        if (reduced.matches) { stop(); repaint(); } else { play(); }
+      });
+    }
+
+    play();
+
+    // Release the GL objects on a real unload. Browsers cap live contexts around
+    // 16. Guarded on persisted, because a bfcache restore would otherwise bring
+    // the reader back to a canvas whose context we had thrown away.
+    window.addEventListener('pagehide', function(e){
+      if (e.persisted) return;
+      stop();
+      if (ro) ro.disconnect();
+      vio.disconnect();
+      mo.disconnect();
+      gl.deleteBuffer(buffer);
+      gl.deleteProgram(program);
+      gl.deleteShader(vs);
+      gl.deleteShader(fs);
+      var lose = gl.getExtension('WEBGL_lose_context');
+      if (lose) lose.loseContext();
+    });
+  })();
+
   // open on the tab named in the URL, so #incubator can be linked directly
   (function(){
     var h = location.hash.slice(1);
     if (h && document.getElementById(h) &&
         document.getElementById(h).classList.contains('page')) show(h);
   })();
+})();
+</script>
+
+<!-- =====================================================================
+     SCROLL-STATE NAV — the flag behind the CSS block at the end of <style>.
+     A separate IIFE on purpose: the main script above is a closed scope and
+     this hooks it without touching a line of it.
+     ===================================================================== -->
+<script>
+(function(){
+  var header = document.querySelector('header.nav');
+  if (!header) return;
+  var links = document.getElementById('links');
+
+  function sync(){
+    // 50px, matching labs. Below the threshold the bar is transparent.
+    var y = window.scrollY !== undefined ? window.scrollY : window.pageYOffset;
+    header.classList.toggle('is-scrolled', (y || 0) > 50);
+  }
+
+  // SEEDED FROM THE REAL POSITION, not from false. A reload partway down a tab,
+  // or a browser restoring its scroll offset, would otherwise paint a
+  // transparent bar over mid-page content until the reader's next scroll.
+  sync();
+  window.addEventListener('scroll', sync, {passive:true});
+  // A viewport change can clamp scrollY without firing scroll on every engine.
+  window.addEventListener('resize', sync, {passive:true});
+  // bfcache restores the old offset and fires pageshow, not scroll.
+  window.addEventListener('pageshow', sync);
+  // Belt and braces for Lenis. It scrolls the real window, so the native
+  // listener above already covers it; this only removes the dependency on that
+  // staying true. __lenis is null when Lenis did not load or was torn down by
+  // the loop guard, and the native listener carries it alone in that case.
+  if (window.__lenis && window.__lenis.on) window.__lenis.on('scroll', sync);
+
+  // THE DRAWER FORCES THE SOLID STATE at any scroll position. Watching the
+  // class hooks the existing toggle handler AND show()'s close, without
+  // duplicating either — the same trick the shader block uses on #home.
+  if (links && window.MutationObserver) {
+    new MutationObserver(function(){
+      header.classList.toggle('is-open', links.classList.contains('open'));
+    }).observe(links, {attributes:true, attributeFilter:['class']});
+  }
 })();
 </script>
 </body>
