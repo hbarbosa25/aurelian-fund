@@ -138,7 +138,22 @@
   .btn-access:hover{background:var(--gold);color:var(--ink);border-color:var(--gold);}
   .menu-toggle{display:none;background:none;border:0;color:var(--gold);cursor:pointer;padding:8px;}
 
-  .page{display:none;}
+  /* position + z-index are REQUIRED here, not tidying, and the veil below is
+     unreadable without them.
+     .page.active animates pageIn with fill-mode both, so after it finishes the
+     transform keeps applying and computes to matrix(1,0,0,1,0,0) rather than
+     none. A non-none transform creates a stacking context, so every tab section
+     was a stacking context on a STATIC element: .wrap's z-index:1 was trapped
+     inside it, and the whole subtree therefore painted in the in-flow band,
+     which is BELOW every positioned z-index:0 layer. Measured that way: the
+     0.85 veil covered the copy and the portfolio rows washed out to grey.
+     body::before has always had the same relationship to the content and gets
+     away with it only because it is a nearly transparent grid.
+     Lifting the section itself to a positioned z-index:1 puts the whole tab
+     above the three z-0 layers (grid, field, veil) and leaves the nav at 50
+     untouched. It does not depend on how the animation is written, which the
+     alternative fixes all did. */
+  .page{display:none;position:relative;z-index:1;}
   .page.active{display:block;animation:pageIn .5s ease both;}
   @keyframes pageIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
 
@@ -147,19 +162,59 @@
     min-height:calc(100svh - var(--nav-h));
     display:flex;align-items:flex-end;
     padding:0 0 clamp(70px,11vh,130px);
-    /* the shader field lives here and only here — one moment, not a page-wide
-       effect. isolation keeps the canvas above body::before without giving the
-       hero a z-index that would have to be reasoned about against the nav. */
-    position:relative;isolation:isolate;overflow:hidden;
-    /* fallback for a machine with no WebGL. The canvas is transparent until it
-       draws, so this is what shows through: a dark green field, not a hole. */
+    position:relative;
+    /* NO BACKGROUND HERE ANY MORE, and that is load-bearing. The hero used to
+       own the field and carried an opaque #0D1912 plus a radial gradient as the
+       no-WebGL fallback. The canvas is now a fixed backdrop behind the whole
+       document, so an opaque background on this box would paint straight over
+       it and the home hero would be the one tab with no field at all.
+       The fallback moved onto .hero-gl, where it belongs: the canvas is
+       transparent until GL draws, so its own CSS background IS the fallback.
+       isolation:isolate went with it. It existed to keep a child canvas above
+       body::before; there is no child canvas now, and leaving it would have
+       created a stacking context that traps .wrap's z-index inside the hero. */
+  }
+  /* ---------- the field ----------
+     FIXED to the viewport and behind everything, not absolute inside the hero.
+     Henrique 2026-08-11: the portfolio, incubator and team tabs should carry the
+     same background as home. They are sections of one document that are shown
+     and hidden by class, so the honest way to give all four the same field is
+     ONE canvas behind the document rather than four canvases, four contexts and
+     four render loops against a browser cap of about 16 live contexts.
+     z-index 0 with body::before, and later in tree order, so the field paints
+     over the grid texture. That texture is not dead: the canvas is transparent
+     until GL draws, so on a machine with no WebGL the grid and the radial
+     fallback below are exactly what the reader sees. */
+  .hero-gl{
+    position:fixed;inset:0;z-index:0;
+    width:100%;height:100%;display:block;pointer-events:none;
     background-color:#0D1912;
     background-image:radial-gradient(120% 90% at 50% 40%, #213E2F 0%, #0D1912 70%);
   }
-  .hero-gl{
-    position:absolute;inset:0;z-index:0;
-    width:100%;height:100%;display:block;pointer-events:none;
+  /* ---------- the veil ----------
+     Home shows the field at full strength. Every other tab shows it under this,
+     and the alpha is a measurement rather than a taste call.
+     --sage (#8d9884) is the body colour on those tabs and it CANNOT sit on the
+     bare field: 2.34:1 against the field's brightest pixel, the gold ember
+     #6A5935. Compositing #0D1912 over that pixel and recomputing:
+         alpha  worst-pixel luminance   --sage contrast
+         0.55        0.0331                 4.19:1   fails
+         0.65        0.0273                 4.50:1   exactly on the line
+         0.70        0.0237                 4.72:1   shipped
+     0.70 keeps the field visibly alive while every piece of sage copy on the
+     three content tabs clears AA against the worst instant of the animation.
+     Do not lower it without re-running that arithmetic. Cream is 12.8:1 here and
+     was never the constraint. */
+  body::after{
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:rgba(13,25,18,0.70);
+    opacity:1;
+    /* matched to the nav's own 420ms so a tab switch settles as one gesture */
+    transition:opacity 420ms var(--ease-out,cubic-bezier(0.23,1,0.32,1));
   }
+  /* Home is the exception, and it is written as the exception so that a tab
+     added later is veiled by default rather than shipping unreadable. */
+  body[data-page="home"]::after{opacity:0;}
   /* NO SCRIM, and that is a measured result, not an omission. Cream on this
      field was sampled under real glyph coverage across 11 viewports and 25 time
      values spanning four minutes of drift: the worst single pixel is 5.50:1
@@ -760,7 +815,16 @@
   <link rel="apple-touch-icon" href="/favicon-192x192.png">
   <meta property="og:image" content="https://aurelian.fund/logo.png">
 </head>
-<body>
+<!-- data-page is set here as well as in show(), so the veil is already correct on
+     the very first paint. Without it the page opens veiled for one frame before
+     the script runs, and home flashes dark. -->
+<body data-page="home">
+
+<!-- The field, behind the whole document. It sits before <main> in tree order so
+     it paints over body::before (the grid fallback) and under body::after (the
+     veil) without either needing a z-index above 0. aria-hidden and
+     pointer-events:none: it is a surface, never content. -->
+<canvas class="hero-gl" id="heroGL" aria-hidden="true"></canvas>
 
 <!-- ============ NAV ============ -->
 <header class="nav">
@@ -789,7 +853,6 @@
 <!-- ============ HOME ============ -->
 <section class="page active" id="home">
   <div class="hero">
-    <canvas class="hero-gl" id="heroGL" aria-hidden="true"></canvas>
     <div class="wrap reveal">
       <h1 class="display">The foundations of the next era are being rebuilt</h1>
     </div>
@@ -1451,6 +1514,11 @@
 
   function show(id){
     pages.forEach(function(p){ p.classList.toggle('active', p.id===id); });
+    // The field runs behind every tab now, and this attribute is the ONLY hook
+    // that decides how much of it shows: home at full strength, every other tab
+    // under the veil in body::after. Set on <body> rather than a class so the
+    // CSS reads as a state and cannot collide with the .page classes.
+    document.body.setAttribute('data-page', id);
     navlinks.forEach(function(n){ n.setAttribute('aria-current', n.getAttribute('data-tab')===id ? 'true':'false'); });
     if (lenis) { lenis.scrollTo(0, {immediate:true}); }
     else { window.scrollTo({top:0, behavior:'auto'}); }
@@ -1651,19 +1719,29 @@
   //   2. compile and link status are checked and logged, so a GLSL typo is not
   //      a silent black rectangle;
   //   3. reduced motion gets the static frame and no loop;
-  //   4. the .hero CSS gradient underneath is the no-WebGL fallback;
-  //   5. the loop pauses offscreen, on a hidden tab, and on a hidden section;
+  //   4. the canvas's own CSS gradient underneath is the no-WebGL fallback;
+  //   5. the loop pauses on a hidden browser tab;
   //   6. GL objects are released on teardown — browsers cap live contexts near 16;
   //   7. drawing-buffer pixels are capped; devicePixelRatio alone is not a cap;
   //   8. hex is parsed defensively, 3 digit and 6.
-  // It runs on the home hero and nowhere else. A shader behind every section is
-  // exactly what this page's restraint exists to prevent.
+  //
+  // IT NOW RUNS BEHIND EVERY TAB, not just the home hero (Henrique 2026-08-11:
+  // portfolio, incubator and team should carry the same background). One fixed
+  // canvas for the whole document, so this is still one context and one loop no
+  // matter how many tabs the page grows. The restraint moved from "where the
+  // field is" to "how much of it shows": every tab but home renders it under the
+  // 0.70 veil in body::after, whose alpha is derived from --sage's contrast
+  // against the field's brightest pixel. See the CSS.
   // ---------------------------------------------------------------------
   (function(){
     var canvas = document.getElementById('heroGL');
-    var home = document.getElementById('home');
-    var container = canvas && canvas.parentNode;
-    if (!canvas || !home || !container) return;
+    if (!canvas) return;
+    // The canvas is its own container now: position:fixed with inset:0 means its
+    // box IS the viewport, so it measures itself and there is no parent whose
+    // size has to be kept in sync with it. It also can never measure 0 the way
+    // the hero did while its section was display:none, which is what the whole
+    // tab-switch repaint dance below used to exist for.
+    var container = canvas;
 
     // Measured on the labs site and reused verbatim so the two properties match.
     // Do not brighten: a brighter candidate drifted the headline to 3.53:1 as the
@@ -1883,7 +1961,9 @@
       // costs the reader nothing but the movement.
       if (running || !onscreen || document.hidden) return;
       if (reduced && reduced.matches) return;
-      if (!home.classList.contains('active')) return;
+      // The home-only guard that used to sit here is GONE. It read
+      // home.classList.contains('active') and returned, which is precisely what
+      // would leave the field frozen on the three tabs this change is for.
       running = true; start = null;
       raf = requestAnimationFrame(frame);
     }
@@ -1894,34 +1974,39 @@
       draw(elapsed);
     }
 
+    // BOTH, not one or the other. The window listener used to be the fallback
+    // for a browser with no ResizeObserver; it is now the primary signal,
+    // because a position:fixed inset:0 canvas is exactly the viewport and a
+    // window resize is the event that changes it.
+    // This is not belt and braces. Caught by measuring: a page that LOADS at a
+    // zero-size viewport (a background tab, a headless or preview renderer)
+    // takes the !w || !h early return in resize(), keeps the 300x150 default
+    // buffer, and then never corrects, because the only thing that would have
+    // corrected it was an observer callback that environment does not deliver.
+    // resize() early-returns when nothing changed, so the redundancy is free.
     var ro = null;
     if (window.ResizeObserver) {
       ro = new ResizeObserver(function(){ if (resize()) draw(elapsed); });
       ro.observe(container);
-    } else {
-      window.addEventListener('resize', function(){ if (resize()) draw(elapsed); });
     }
+    window.addEventListener('resize', function(){ if (resize()) draw(elapsed); });
 
-    // Pause offscreen. A shader on a section nobody is looking at is pure
-    // battery cost.
-    var vio = new IntersectionObserver(function(entries){
-      onscreen = entries.some(function(e){ return e.isIntersecting; });
-      if (onscreen) { repaint(); play(); } else { stop(); }
-    }, {threshold:0});
-    vio.observe(container);
-
-    // Tab switching is the trap on this page. Sections are shown and hidden by
-    // class, so while #home is hidden the container measures 0 and the drawing
-    // buffer is never composited — it comes back blank, or stretched if it was
-    // resized meanwhile. Watching the class hooks the existing show() without
-    // touching it, and the repaint is unconditional because the buffer can be
-    // empty even when its dimensions did not change.
-    var mo = new MutationObserver(function(){
-      if (home.classList.contains('active')) { repaint(); play(); }
-      else { stop(); }
-    });
-    mo.observe(home, {attributes:true, attributeFilter:['class']});
-
+    // THE OFFSCREEN OBSERVER AND THE TAB-CLASS OBSERVER ARE BOTH GONE, and
+    // deleting them is part of the change rather than tidying alongside it.
+    //
+    // The IntersectionObserver paused the loop when the hero scrolled out of
+    // view. A fixed backdrop is never out of view, so it would have reported
+    // intersecting on every callback: dead weight that reads as live logic.
+    //
+    // The MutationObserver existed for a trap that no longer exists. The hero
+    // lived inside a section that display:none hides, so its box measured 0 and
+    // its drawing buffer came back blank or stretched after a tab switch, and
+    // that observer repainted it. The canvas is now outside every .page and is
+    // never hidden, so there is nothing to repaint and nothing to watch.
+    //
+    // What is left is the one pause that still means something: a hidden browser
+    // tab, below. `onscreen` stays true for the life of the page and is kept
+    // only so play()'s guard reads the same as it did.
     document.addEventListener('visibilitychange', function(){
       if (document.hidden) stop();
       else { repaint(); play(); }
@@ -1941,8 +2026,9 @@
       if (e.persisted) return;
       stop();
       if (ro) ro.disconnect();
-      vio.disconnect();
-      mo.disconnect();
+      // vio and mo were disconnected here. Both observers are gone (see above),
+      // and leaving these two lines behind would have thrown a ReferenceError on
+      // every unload, taking the GL teardown under them with it.
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);
       gl.deleteShader(vs);
