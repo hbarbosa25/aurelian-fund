@@ -43,8 +43,12 @@
     --t-form:16px;
     /* The nav height the hero subtracts. It used to be hardcoded twice, so the
        moment a fourth nav item made the bar wrap the hero overshot the viewport
-       on a page nobody was editing. */
-    --nav-h:91px;
+       on a page nobody was editing.
+       91 -> 89 on 2026-08-12 because the mark went 54 -> 52 to match
+       aurelianlabs.ai. This is the bar's MEASURED height including its 1px
+       hairline (18 + 52 + 18 + 1), not a round number, and the hero cancels it
+       with a negative margin. Resize the mark and this moves with it. */
+    --nav-h:89px;
     --serif:'Playfair Display', Georgia, serif;
     --sans:'Instrument Sans', system-ui, -apple-system, sans-serif;
   }
@@ -114,9 +118,22 @@
     display:flex;align-items:center;gap:16px;cursor:pointer;
     background:none;border:0;padding:0;text-align:left;font:inherit;color:inherit;
   }
-  .mark{width:54px;height:54px;flex:none;}
+  /* ---------- the masthead ----------
+     THESE FOUR NUMBERS ARE SHARED WITH aurelianlabs.ai AND MUST STAY IN STEP.
+     Henrique 2026-08-12: crossing between the two sites should change the word
+     and nothing else. Measured before: this site was a 54px mark with a 19px
+     wordmark, labs was 52px with 25px, and the rendered wordmarks only looked
+     alike because "Ventures" is longer than "Labs" (249px against 244px).
+     Labs' pair won, because he asked for that enlargement the day before.
+       mark            52px desktop / 42px below 940
+       wordmark        --t-h3 (25px) / --t-lg (19px) below 940
+       letter-spacing  .17em desktop / .12em below 940
+       --nav-h         89px / 79px
+     Change one here and change it in aurelianlabs.ai's Layout.tsx in the same
+     breath, or the two mastheads drift apart again. */
+  .mark{width:52px;height:52px;flex:none;}
   .brand .name{
-    font-family:var(--serif);font-size:var(--t-lg);letter-spacing:.17em;color:var(--cream);
+    font-family:var(--serif);font-size:var(--t-h3);letter-spacing:.17em;color:var(--cream);
     text-transform:uppercase;font-weight:500;white-space:nowrap;
   }
   nav.links{display:flex;align-items:center;gap:6px;}
@@ -575,16 +592,44 @@
     .line-item{padding:40px;}
     .gp-grid{grid-template-columns:1fr 1fr;gap:40px;}
   }
-  /* Nav collapses at 940px, NOT 860px. Measured: brand 319 + four links 484 +
-     gap 24 + padding 68 = 895px minimum for the four-item bar. At the old 860px
-     drawer breakpoint the 861-894px band rendered a wrapped two-line "Request
-     access", a 120px header, and a hero overshooting the viewport by 29px. */
-  @media(max-width:940px){
+  /* Nav collapses at 1000px. It was 860, then 940, and it is 1000 now because the
+     brand got wider: the 25px wordmark took the mark-plus-wordmark block from
+     319px to 396px on 2026-08-12.
+
+     MEASURED at 960px, which is exactly the failure this guards: brand 396 +
+     right group 504 (its natural width with the button on one line) + padding 68
+     = 968px needed, against 960 available. "Request access" wrapped to two lines,
+     the right group went 43px to 63px tall, and the bar rendered 99.9px against
+     an 89px --nav-h, so the hero overshot and a 11px strip sat under the bar.
+     Exactly the bug the 860 -> 940 move fixed the first time, reopened by the
+     wider wordmark.
+
+     Padding is the reason 1000 rather than 968: --pad is 34px at or below 1100
+     and 44px above it, so the requirement is 968 on the narrow gutter and 988 on
+     the wide one, and the breakpoint has to clear the larger.
+
+     aurelianlabs.ai collapses at 1000 too. Its bar needs far less, so it does not
+     need the room; it matches because the two mastheads are supposed to be
+     identical at EVERY width, and a band where one site shows three links and the
+     other a hamburger is a bigger difference than the wordmark size ever was. */
+  @media(max-width:1000px){
+    /* Shared with aurelianlabs.ai. See the masthead note above. --t-lg keeps its
+       only consumer here: the desktop wordmark moved up to --t-h3, so without
+       this line the 19px step would have none left.
+       --nav-h STAYS 73 here. MEASURED at 390px: the bar renders 73px, because
+       below 940 the 44px toggle is taller than the 42px mark and it, not the
+       logo, sets the height. So the mark going 44 -> 42 does not move this,
+       which is exactly why it is measured rather than derived from the mark.
+       aurelianlabs.ai declared 79 for this and was wrong by 6px; it now agrees. */
     :root{--nav-h:73px;}
     .nav-inner{padding:14px var(--pad);}
-    .mark{width:44px;height:44px;}
-    .brand .name{font-size:var(--t-base);letter-spacing:.12em;}
-    nav.links{position:fixed;inset:78px 0 auto 0;flex-direction:column;align-items:stretch;
+    .mark{width:42px;height:42px;}
+    .brand .name{font-size:var(--t-lg);letter-spacing:.12em;}
+    /* inset-top tracks --nav-h instead of a hardcoded 78px. It was already 5px
+       out of step with the 73px bar it was supposed to hang from, and the mark
+       resize would have made it 1px worse in the other direction: the drawer
+       would have overlapped the bar's hairline. Now it cannot drift at all. */
+    nav.links{position:fixed;inset:var(--nav-h) 0 auto 0;flex-direction:column;align-items:stretch;
       background:var(--ink-2);border-bottom:1px solid var(--line);padding:14px 22px 22px;gap:2px;
       transform:translateY(-160%);transition:transform .35s ease;visibility:hidden;}
     nav.links.open{transform:none;visibility:visible;}
@@ -697,7 +742,7 @@
     background-color:transparent;
     -webkit-backdrop-filter:none;
     backdrop-filter:none;
-    /* TRANSPARENT, not absent. --nav-h (91px, 73px below 940) is measured
+    /* TRANSPARENT, not absent. --nav-h (89px, 79px below 940) is measured
        INCLUDING this hairline and the hero subtracts --nav-h, so dropping the
        border in one state would change the bar's height by 1px and shunt the
        whole page down and back again every time the threshold is crossed. */
